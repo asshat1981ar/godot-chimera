@@ -32,5 +32,12 @@ func _on_continue_pressed() -> void:
 	SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")
 
 func _on_menu_pressed() -> void:
-	GameState.save_game()
+	GameState.save_game("auto")
 	SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_back"):
+		get_viewport().set_input_as_handled()
+		GameState.save_game("auto")
+		GameState.current_phase = GameState.Phase.OVERWORLD
+		SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")

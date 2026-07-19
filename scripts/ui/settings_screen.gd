@@ -36,5 +36,11 @@ func _on_speed_changed(value: float) -> void:
 	_update_speed_label()
 
 func _on_back_pressed() -> void:
-	GameState.save_game()
+	GameState.save_game("auto")
 	SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_back"):
+		get_viewport().set_input_as_handled()
+		GameState.save_game("auto")
+		SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")

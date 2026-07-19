@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/world/overhead_map.gd" id="1_omap"]
 [ext_resource type="Script" path="res://scripts/world/map_camera.gd" id="2_cam"]
-[ext_resource type="Shader" path="res://assets/shaders/ink_wash.gdshader" id="3_shader"]
+[ext_resource type="Script" path="res://scripts/ui/gothic_button.gd" id="3_gbtn"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ink"]
 width = 512
@@ -22,30 +22,30 @@ script = ExtResource("2_cam")
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="TopBar" type="PanelContainer" parent="HUD"]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 48.0
+offset_bottom = 56.0
 grow_horizontal = 2
 
 [node name="ActLabel" type="Label" parent="HUD/TopBar"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "Act 1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Panel" type="PanelContainer" parent="HUD"]
-custom_minimum_size = Vector2(280, 160)
+custom_minimum_size = Vector2(320, 180)
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -296.0
-offset_top = -176.0
+offset_left = -336.0
+offset_top = -196.0
 offset_right = -16.0
 offset_bottom = -16.0
 grow_horizontal = 0
@@ -53,10 +53,10 @@ grow_vertical = 0
 
 [node name="Margin" type="MarginContainer" parent="HUD/Panel"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="VBox" type="VBoxContainer" parent="HUD/Panel/Margin"]
 layout_mode = 2
@@ -68,34 +68,145 @@ text = "Select a node to travel."
 bbcode_enabled = true
 fit_content = true
 
-[node name="BottomBar" type="HBoxContainer" parent="HUD"]
+[node name="QuickBar" type="PanelContainer" parent="HUD"]
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 11
+anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -64.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 0
-alignment = 1
-theme_override_constants/separation = 24
+offset_left = -108.0
+offset_top = 72.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 2
 
-[node name="CampButton" type="Button" parent="HUD/BottomBar"]
+[node name="Margin" type="MarginContainer" parent="HUD/QuickBar"]
 layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="HUD/QuickBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CampButton" type="Button" parent="HUD/QuickBar/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+size_flags_vertical = 3
 text = "Camp"
+script = ExtResource("3_gbtn")
 
-[node name="PartyButton" type="Button" parent="HUD/BottomBar"]
+[node name="PartyButton" type="Button" parent="HUD/QuickBar/Margin/VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+size_flags_vertical = 3
 text = "Party"
+script = ExtResource("3_gbtn")
 
-[node name="JournalButton" type="Button" parent="HUD/BottomBar"]
+[node name="JournalButton" type="Button" parent="HUD/QuickBar/Margin/VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+size_flags_vertical = 3
 text = "Journal"
+script = ExtResource("3_gbtn")
 
-[node name="MenuButton" type="Button" parent="HUD/BottomBar"]
+[node name="JournalBadge" type="Label" parent="HUD/QuickBar/Margin/VBox/JournalButton"]
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -26.0
+offset_top = -6.0
+offset_right = 6.0
+offset_bottom = 26.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SettingsButton" type="Button" parent="HUD/QuickBar/Margin/VBox"]
 layout_mode = 2
-text = "Menu"
+custom_minimum_size = Vector2(0, 84)
+size_flags_vertical = 3
+text = "Settings"
+script = ExtResource("3_gbtn")
+
+[node name="PauseMenu" type="Control" parent="HUD"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Blocker" type="ColorRect" parent="HUD/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0, 0.0, 0.0, 0.5)
+
+[node name="Panel" type="PanelContainer" parent="HUD/PauseMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -220.0
+offset_right = 220.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/PauseMenu/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="HUD/PauseMenu/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="HUD/PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="HUD/PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+text = "Continue"
+script = ExtResource("3_gbtn")
+
+[node name="SettingsButton" type="Button" parent="HUD/PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+text = "Settings"
+script = ExtResource("3_gbtn")
+
+[node name="MainMenuButton" type="Button" parent="HUD/PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+text = "Main Menu"
+script = ExtResource("3_gbtn")
+
+[node name="QuitButton" type="Button" parent="HUD/PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+text = "Quit"
+script = ExtResource("3_gbtn")
 
 [node name="InkWash" type="ColorRect" parent="HUD"]
 visible = false
@@ -105,7 +216,11 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.06, 0.05, 0.04, 0.35)
 
-[connection signal="pressed" from="HUD/BottomBar/CampButton" to="." method="_on_camp_button_pressed"]
-[connection signal="pressed" from="HUD/BottomBar/PartyButton" to="." method="_on_party_button_pressed"]
-[connection signal="pressed" from="HUD/BottomBar/JournalButton" to="." method="_on_journal_button_pressed"]
-[connection signal="pressed" from="HUD/BottomBar/MenuButton" to="." method="_on_menu_button_pressed"]
+[connection signal="pressed" from="HUD/QuickBar/Margin/VBox/CampButton" to="." method="_on_quick_camp_pressed"]
+[connection signal="pressed" from="HUD/QuickBar/Margin/VBox/PartyButton" to="." method="_on_quick_party_pressed"]
+[connection signal="pressed" from="HUD/QuickBar/Margin/VBox/JournalButton" to="." method="_on_quick_journal_pressed"]
+[connection signal="pressed" from="HUD/QuickBar/Margin/VBox/SettingsButton" to="." method="_on_quick_settings_pressed"]
+[connection signal="pressed" from="HUD/PauseMenu/Panel/Margin/VBox/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="HUD/PauseMenu/Panel/Margin/VBox/SettingsButton" to="." method="_on_pause_settings_pressed"]
+[connection signal="pressed" from="HUD/PauseMenu/Panel/Margin/VBox/MainMenuButton" to="." method="_on_pause_main_menu_pressed"]
+[connection signal="pressed" from="HUD/PauseMenu/Panel/Margin/VBox/QuitButton" to="." method="_on_pause_quit_pressed"]

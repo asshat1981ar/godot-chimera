@@ -16,6 +16,8 @@ signal camp_night_started(risk_level: float)
 signal journal_updated(entry_id: String)
 signal inventory_changed(item_id: String, quantity: int)
 signal quest_objective_updated(objective_id: String, status: String)
+signal act_advanced(act: int)
+signal finale_resolved(ending_id: String, title: String)
 signal ui_request(screen_name: String, payload: Dictionary)
 
 func emit_state_changed(key: String, value: Variant) -> void:
@@ -62,3 +64,9 @@ func emit_camp_night_started(risk_level: float) -> void:
 
 func emit_quest_objective_updated(objective_id: String, status: String) -> void:
 	quest_objective_updated.emit(objective_id, status)
+
+func emit_act_advanced(act: int) -> void:
+	act_advanced.emit(act)
+
+func emit_finale_resolved(ending_id: String, title: String) -> void:
+	finale_resolved.emit(ending_id, title)

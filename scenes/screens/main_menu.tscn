@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://mmainmenu0001"]
+[gd_scene load_steps=3 format=3 uid="uid://mmainmenu0001"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/ui/gothic_button.gd" id="2_gbtn"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -23,47 +24,128 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -140.0
-offset_right = 160.0
-offset_bottom = 220.0
+offset_left = -220.0
+offset_top = -180.0
+offset_right = 220.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 20
 
 [node name="TitleLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 42
+theme_override_font_sizes/font_size = 48
 text = "Chimera"
 horizontal_alignment = 1
 
 [node name="SubtitleLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "Ashes of the Hollow King"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="VBoxContainer"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 24)
 size_flags_vertical = 3
 
 [node name="NewGameButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
 text = "New Game"
+script = ExtResource("2_gbtn")
 
 [node name="ContinueButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
 text = "Continue"
+script = ExtResource("2_gbtn")
 
 [node name="SettingsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
 text = "Settings"
+script = ExtResource("2_gbtn")
 
 [node name="QuitButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
 text = "Quit"
+script = ExtResource("2_gbtn")
+
+[node name="NewGameConfirm" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Blocker" type="ColorRect" parent="NewGameConfirm"]
+layout_mode = 1
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0, 0.0, 0.0, 0.5)
+
+[node name="Panel" type="PanelContainer" parent="NewGameConfirm"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -180.0
+offset_right = 280.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="NewGameConfirm/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="NewGameConfirm/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="NewGameConfirm/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Overwrite save?"
+horizontal_alignment = 1
+
+[node name="SummaryLabel" type="RichTextLabel" parent="NewGameConfirm/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "An existing save was found."
+
+[node name="ButtonRow" type="HBoxContainer" parent="NewGameConfirm/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="NewGameConfirm/Panel/Margin/VBox/ButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 84)
+text = "Cancel"
+script = ExtResource("2_gbtn")
+
+[node name="ConfirmButton" type="Button" parent="NewGameConfirm/Panel/Margin/VBox/ButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 84)
+text = "New Game"
+script = ExtResource("2_gbtn")
 
 [connection signal="pressed" from="VBoxContainer/NewGameButton" to="." method="_on_new_game_pressed"]
 [connection signal="pressed" from="VBoxContainer/ContinueButton" to="." method="_on_continue_pressed"]
 [connection signal="pressed" from="VBoxContainer/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="VBoxContainer/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="NewGameConfirm/Panel/Margin/VBox/ButtonRow/CancelButton" to="." method="_on_new_game_cancel_pressed"]
+[connection signal="pressed" from="NewGameConfirm/Panel/Margin/VBox/ButtonRow/ConfirmButton" to="." method="_on_new_game_confirm_pressed"]

@@ -12,6 +12,23 @@ const STANCE_NAMES: Dictionary = {
 }
 
 var _duel_state: Dictionary = {}
+var _rng: RandomNumberGenerator = null
+var _turn_count: int = 0
+
+func _ready() -> void:
+	_reseed()
+	EventBus.state_changed.connect(_on_state_changed)
+
+func _reseed() -> void:
+	_rng = RandomNumberGenerator.new()
+	var seed_value: int = GameState.rng_seed
+	if seed_value == 0:
+		seed_value = int(Time.get_unix_time_from_system())
+	_rng.seed = seed_value
+
+func _on_state_changed(key: String, _value: Variant) -> void:
+	if key == "rng_seed":
+		_reseed()
 
 func travel_to(node_id: String) -> void:
 	if not GameState.is_node_unlocked(node_id):
@@ -31,6 +48,7 @@ func travel_to(node_id: String) -> void:
 	var scene_id: String = node.get("sceneId", "")
 	if not scene_id.is_empty():
 		_enter_scene(scene_id)
+	GameState.save_game("auto")
 	EventBus.emit_state_changed("current_node", node_id)
 
 func _enter_scene(scene_id: String) -> void:
@@ -65,26 +83,24 @@ func _archetype_feedback(npc_id: String, choice_type: String) -> void:
 	match archetype:
 		"SHIFTING_THE_BURDEN":
 			if choice_type == "defer":
-				_schedule_disposition(npc_id, -0.12, 3)
+				GameState.add_pending_disposition(npc_id, -0.12, 3)
 		"ESCALATION":
 			if choice_type in ["threaten", "demand"]:
-				_schedule_disposition(npc_id, -0.06, 2)
+				GameState.add_pending_disposition(npc_id, -0.06, 2)
 		"GROWTH_AND_UNDERINVESTMENT":
 			if choice_type == "help":
-				_schedule_disposition(npc_id, 0.08, 2)
+				GameState.add_pending_disposition(npc_id, 0.08, 2)
 		"FIXES_THAT_FAIL":
 			if choice_type == "lie":
-				_schedule_disposition(npc_id, -0.10, 3)
+				GameState.add_pending_disposition(npc_id, -0.10, 3)
 
-func _schedule_disposition(npc_id: String, delta: float, seconds: float) -> void:
-	var timer := get_tree().create_timer(seconds)
-	timer.timeout.connect(_apply_delayed_disposition.bind(npc_id, delta))
-
-func _apply_delayed_disposition(npc_id: String, delta: float) -> void:
-	GameState.adjust_disposition(npc_id, delta)
+func advance_simulation_turn() -> void:
+	_turn_count += 1
+	GameState.consume_pending_dispositions()
 
 func start_duel(opponent_id: String) -> void:
 	GameState.current_phase = GameState.Phase.DUEL
+	_turn_count = 0
 	_duel_state = {
 		"opponent_id": opponent_id,
 		"player_resolve": 10,
@@ -99,20 +115,24 @@ func start_duel(opponent_id: String) -> void:
 func submit_stance(player_stance: Stance) -> void:
 	if _duel_state.is_empty():
 		return
+	_turn_count += 1
 	var opponent_stance := _ai_stance()
 	var outcome: Dictionary = _resolve_exchange(player_stance, opponent_stance)
 	_duel_state.player_resolve += int(outcome.player_delta)
 	_duel_state.opponent_resolve += int(outcome.opponent_delta)
 	_duel_state.player_omen = clampi(_duel_state.player_omen + int(outcome.omen_delta), 0, 5)
+	var turn_log := _turn_log_line(STANCE_NAMES[player_stance], STANCE_NAMES[opponent_stance], outcome)
+	GameState.consume_pending_dispositions()
 	EventBus.emit_duel_turn(STANCE_NAMES[player_stance], _duel_state.player_omen)
 	_check_duel_end()
+	_duel_state["last_turn_log"] = turn_log
 
 func resolve_duel(player_id: String, opponent_id: String) -> Dictionary:
 	## Headless deterministic duel resolution: returns { winner_id, turns }.
 	start_duel(opponent_id)
 	var turns := 0
 	while _duel_state.winner.is_empty() and turns < 20:
-		var stance: Stance = Stance.values().pick_random()
+		var stance: Stance = Stance.values()[_rng.randi() % Stance.values().size()]
 		submit_stance(stance)
 		turns += 1
 	return {
@@ -120,8 +140,55 @@ func resolve_duel(player_id: String, opponent_id: String) -> Dictionary:
 		"turns": turns,
 	}
 
+func set_rng_seed(seed_value: int) -> void:
+	GameState.rng_seed = seed_value
+	_reseed()
+
 func _ai_stance() -> Stance:
-	return Stance.values().pick_random()
+	return Stance.values()[_rng.randi() % Stance.values().size()]
+
+func _turn_log_line(player_stance: String, opponent_stance: String, outcome: Dictionary) -> String:
+	var player_delta: int = int(outcome.player_delta)
+	var opponent_delta: int = int(outcome.opponent_delta)
+	var omen_delta: int = int(outcome.omen_delta)
+	if player_delta < 0 and opponent_delta == 0:
+		return "You strike %s, but they answer harder. You lose %d Resolve." % [opponent_stance, -player_delta]
+	elif opponent_delta < 0 and player_delta == 0:
+		return "Your %s finds its mark. Opponent loses %d Resolve." % [player_stance, -opponent_delta]
+	elif omen_delta < 0:
+		return "Stances mirror each other; the omen burns. Omen %d." % [omen_delta]
+	return "Exchange settles without blood."
+
+func duel_round(player_intent: String, npc_intent: String) -> Dictionary:
+	## Data-driven intent wrapper for combat_intents.json.
+	## Maps intent ids to STRIKE/WARD/FEINT stances, resolves, and returns a turn summary.
+	var player_stance := _intent_to_stance(player_intent)
+	var npc_stance := _intent_to_stance(npc_intent)
+	var pre_player_resolve: int = _duel_state.get("player_resolve", 10)
+	var pre_opponent_resolve: int = _duel_state.get("opponent_resolve", 10)
+	submit_stance(player_stance)
+	var summary := {
+		"player_intent": player_intent,
+		"npc_intent": npc_intent,
+		"player_stance": STANCE_NAMES[player_stance],
+		"npc_stance": STANCE_NAMES.get(npc_stance, "unknown"),
+		"player_resolve": _duel_state.get("player_resolve", pre_player_resolve),
+		"npc_resolve": _duel_state.get("opponent_resolve", pre_opponent_resolve),
+		"player_omen": _duel_state.get("player_omen", 0),
+		"log": _duel_state.get("last_turn_log", ""),
+		"winner": _duel_state.get("winner", ""),
+	}
+	return summary
+
+func _intent_to_stance(intent_id: String) -> Stance:
+	match intent_id:
+		"strike", "expose", "overwhelm", "patient_pressure", "match_their_fury":
+			return Stance.STRIKE
+		"defend", "absorb_and_wait", "hold_ground":
+			return Stance.WARD
+		"outmaneuver", "disrupt_rhythm", "offer_a_way_out", "negotiate", "parley":
+			return Stance.FEINT
+	return Stance.STRIKE
 
 func _resolve_exchange(player: Stance, opponent: Stance) -> Dictionary:
 	## Stance triangle: strike beats feint, feint beats ward, ward beats strike.
@@ -138,6 +205,18 @@ func _resolve_exchange(player: Stance, opponent: Stance) -> Dictionary:
 	else:
 		return { "player_delta": 0, "opponent_delta": 0, "omen_delta": -1 }
 
+func get_duel_state() -> Dictionary:
+	return _duel_state.duplicate(true)
+
+func get_duel_winner() -> String:
+	return _duel_state.get("winner", "")
+
+func get_duel_opponent_id() -> String:
+	return _duel_state.get("opponent_id", "")
+
+func get_rng_index() -> int:
+	return _rng.randi()
+
 func _check_duel_end() -> void:
 	var winner := ""
 	if _duel_state.player_resolve <= 0:
@@ -152,11 +231,19 @@ func _check_duel_end() -> void:
 
 func end_scene(scene_id: String) -> void:
 	GameState.mark_scene_completed(scene_id)
+	advance_simulation_turn()
 	GameState.current_phase = GameState.Phase.OVERWORLD
+	_autosave()
+
+func _autosave() -> void:
+	if GameState.current_phase != GameState.Phase.MENU:
+		GameState.save_game("auto")
 
 func rest_at_camp() -> void:
 	GameState.current_phase = GameState.Phase.CAMP
+	advance_simulation_turn()
 	EventBus.emit_camp_night_started(_calculate_camp_risk())
+	_autosave()
 
 func _calculate_camp_risk() -> float:
 	var risk := 0.0
@@ -168,3 +255,56 @@ func _calculate_camp_risk() -> float:
 		elif disp > 0.3:
 			risk -= 0.10
 	return clampf(risk, 0.0, 1.0)
+
+func resolve_finale() -> Dictionary:
+	## Pick an ending from quests.json based on current state.
+	## Returns { ending_id, title, text } or {} if no ending matches.
+	var candidate: Dictionary = {}
+	var fallback: Dictionary = {}
+	for q in Content.quests():
+		for ending in q.get("rewards", {}).get("endings", []):
+			var requires: Dictionary = ending.get("requires", {})
+			if _finale_requires_met(requires):
+				candidate = ending
+				break
+			if fallback.is_empty():
+				fallback = ending
+		if not candidate.is_empty():
+			break
+	if candidate.is_empty():
+		candidate = fallback
+	if candidate.is_empty():
+		return {
+			"ending_id": "ending_default",
+			"title": "The Ash Remembers",
+			"text": "No ending was written for this road. The ash keeps walking."
+		}
+	return {
+		"ending_id": candidate.get("id", ""),
+		"title": candidate.get("title", "Ending"),
+		"text": candidate.get("description", candidate.get("text", "The story ends here."))
+	}
+
+func _finale_requires_met(requires: Dictionary) -> bool:
+	var items: Array = requires.get("items", [])
+	for item_id in items:
+		if int(GameState.inventory.get(item_id, 0)) <= 0:
+			return false
+	var scenes: Array = requires.get("completedScenes", [])
+	for scene_id in scenes:
+		if not GameState.is_scene_completed(scene_id):
+			return false
+	var reveals: Array = requires.get("reveals", [])
+	for tag in reveals:
+		var found := false
+		for entry in Content.lore_entries_by_reveal(tag):
+			if GameState.unlocked_lore.has(entry.get("id", "")):
+				found = true
+				break
+		if not found:
+			return false
+	var min_disp: Dictionary = requires.get("minDisposition", {})
+	for npc_id in min_disp:
+		if GameState.get_disposition(npc_id) < float(min_disp[npc_id]):
+			return false
+	return true

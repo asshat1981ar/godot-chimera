@@ -1,0 +1,93 @@
+[
+  {
+    "id": "purified_coral",
+    "name": "Purified Coral",
+    "category": "ingredient",
+    "rarity": "common",
+    "icon": "assets/images/items/purified_coral.png"
+  },
+  {
+    "id": "hollow_iron",
+    "name": "Hollow Iron",
+    "category": "ingredient",
+    "rarity": "common",
+    "icon": "assets/images/items/hollow_iron.png"
+  },
+  {
+    "id": "king_shard",
+    "name": "King Shard",
+    "category": "ingredient",
+    "rarity": "unique",
+    "icon": "assets/images/items/king_shard.png"
+  },
+  {
+    "id": "forge_ember",
+    "name": "Forge Ember",
+    "category": "ingredient",
+    "rarity": "rare",
+    "icon": "assets/images/items/forge_ember.png"
+  },
+  {
+    "id": "memory_dust",
+    "name": "Memory Dust",
+    "category": "ingredient",
+    "rarity": "common",
+    "icon": "assets/images/items/memory_dust.png"
+  },
+  {
+    "id": "glass_flask",
+    "name": "Glass Flask",
+    "category": "ingredient",
+    "rarity": "common",
+    "icon": "assets/images/items/glass_flask.png"
+  },
+  {
+    "id": "salt_crystal",
+    "name": "Salt Crystal",
+    "category": "ingredient",
+    "rarity": "common",
+    "icon": "assets/images/items/salt_crystal.png"
+  },
+  {
+    "id": "tide_essence",
+    "name": "Tide Essence",
+    "category": "ingredient",
+    "rarity": "rare",
+    "icon": "assets/images/items/tide_essence.png"
+  },
+  {
+    "id": "tide_ward",
+    "name": "Tide Ward",
+    "category": "consumable",
+    "rarity": "rare",
+    "icon": "assets/images/items/tide_ward.png"
+  },
+  {
+    "id": "echo_blade",
+    "name": "Echo Blade",
+    "category": "key",
+    "rarity": "unique",
+    "icon": "assets/images/items/echo_blade.png"
+  },
+  {
+    "id": "memory_vial",
+    "name": "Memory Vial",
+    "category": "consumable",
+    "rarity": "uncommon",
+    "icon": "assets/images/items/memory_vial.png"
+  },
+  {
+    "id": "signal_flare",
+    "name": "Signal Flare",
+    "category": "consumable",
+    "rarity": "rare",
+    "icon": "assets/images/items/signal_flare.png"
+  },
+  {
+    "id": "purification_totem",
+    "name": "Purification Totem",
+    "category": "key",
+    "rarity": "unique",
+    "icon": "assets/images/items/purification_totem.png"
+  }
+]

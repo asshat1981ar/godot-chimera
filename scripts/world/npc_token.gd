@@ -39,6 +39,14 @@ func _process(delta: float) -> void:
 	else:
 		global_position += dir.normalized() * wander_speed * delta
 
+func select() -> void:
+	## Allow tapping an ambient NPC to preview their disposition/name.
+	var npc := Content.npc_by_id(npc_id)
+	var name: String = npc.get("name", npc_id)
+	var disp := GameState.get_disposition(npc_id)
+	var tone := "wary" if disp < -0.2 else "steady" if disp > 0.2 else "neutral"
+	EventBus.emit_ui_request("show_tooltip", {"text": "%s — %s" % [name, tone]})
+
 func _pick_new_target() -> void:
 	var angle := randf() * TAU
 	var dist := randf() * wander_radius

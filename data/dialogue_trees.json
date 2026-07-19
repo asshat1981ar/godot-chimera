@@ -1,0 +1,459 @@
+{
+  "version": 1,
+  "trees": {
+    "tree_warden_gate": {
+      "id": "tree_warden_gate",
+      "npcId": "warden",
+      "sceneId": "prologue_scene_1",
+      "startNodeId": "greeting",
+      "nodes": {
+        "greeting": {
+          "id": "greeting",
+          "speaker": "warden",
+          "text": "State your business. The gate is closed, and the gate remembers why even if you do not.",
+          "choices": [
+            { "id": "w_g_empathize", "text": "You have held this post a long time.", "choiceType": "empathize", "nextNodeId": "duty", "dispositionEffect": 0.05, "conditions": {}, "effects": {} },
+            { "id": "w_g_demand", "text": "Open the gate. Now.", "choiceType": "demand", "nextNodeId": "refusal", "dispositionEffect": -0.08, "conditions": {}, "effects": {} },
+            { "id": "w_g_inquire", "text": "What is this place?", "choiceType": "inquire", "nextNodeId": "history", "dispositionEffect": 0.0, "conditions": {}, "effects": {} }
+          ]
+        },
+        "duty": {
+          "id": "duty",
+          "speaker": "warden",
+          "text": "Longer than most things live. Duty demands I ask again: what are you, that the stones hum when you pass?",
+          "choices": [
+            { "id": "w_d_vow", "text": "I swear I will honor what sleeps here.", "choiceType": "vow", "nextNodeId": "trusted", "dispositionEffect": 0.10, "conditions": {}, "effects": { "vow": "vow_honor_the_hollow" } },
+            { "id": "w_d_inquire", "text": "What happened here?", "choiceType": "inquire", "nextNodeId": "history", "dispositionEffect": 0.0, "conditions": {}, "effects": {} },
+            { "id": "w_d_threaten", "text": "I do not answer to the dead.", "choiceType": "threaten", "nextNodeId": "refusal", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "history": {
+          "id": "history",
+          "speaker": "warden",
+          "text": "The Hollow was dug, not built. A city that listened, ruled by a king who listened harder. Ask the stones politely and they will tell you the rest.",
+          "choices": [
+            { "id": "w_h_listen", "text": "Then teach me to ask politely.", "choiceType": "help", "nextNodeId": "trusted", "dispositionEffect": 0.05, "conditions": {}, "effects": { "reveal": "hollow_history" } },
+            { "id": "w_h_press", "text": "Who was the king?", "choiceType": "inquire", "nextNodeId": "forbidden", "dispositionEffect": 0.0, "conditions": {}, "effects": {} }
+          ]
+        },
+        "forbidden": {
+          "id": "forbidden",
+          "speaker": "warden",
+          "text": "That name stays behind the gate until the gate trusts you. I neither welcome nor refuse. Walk, and we will see what you are.",
+          "choices": [
+            { "id": "w_f_defer", "text": "Fair enough. I will earn the name.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "refusal": {
+          "id": "refusal",
+          "speaker": "warden",
+          "text": "The gate has heard that tone before, from braver bones than yours. Turn back, or be measured.",
+          "choices": [
+            { "id": "w_r_duel", "text": "Measure me, then.", "choiceType": "threaten", "nextNodeId": null, "dispositionEffect": -0.08, "conditions": {}, "effects": { "startDuel": true, "endScene": true } },
+            { "id": "w_r_defer", "text": "Then I will earn my passage.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "trusted": {
+          "id": "trusted",
+          "speaker": "warden",
+          "text": "The gate remembers an oath when it hears one. Pass, ash-born. What you wake below, you answer for.",
+          "choices": [
+            { "id": "w_t_pass", "text": "Enter the Hollow.", "choiceType": "vow", "nextNodeId": null, "dispositionEffect": 0.0, "conditions": { "minDisposition": 0.1 }, "effects": { "endScene": true } }
+          ]
+        }
+      }
+    },
+    "tree_elena_ruins": {
+      "id": "tree_elena_ruins",
+      "npcId": "elena",
+      "sceneId": "outer_ruins_1",
+      "startNodeId": "greeting",
+      "nodes": {
+        "greeting": {
+          "id": "greeting",
+          "speaker": "elena",
+          "text": "Supplies are not free, stranger, and neither is advice. Supply and demand — and you look like demand.",
+          "choices": [
+            { "id": "e_g_inquire", "text": "What are you selling?", "choiceType": "inquire", "nextNodeId": "wares", "dispositionEffect": 0.0, "conditions": {}, "effects": {} },
+            { "id": "e_g_help", "text": "You look short-handed. I can carry.", "choiceType": "help", "nextNodeId": "cache_talk", "dispositionEffect": 0.05, "conditions": {}, "effects": {} },
+            { "id": "e_g_demand", "text": "Your prices are robbery.", "choiceType": "demand", "nextNodeId": "sharp", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "wares": {
+          "id": "wares",
+          "speaker": "elena",
+          "text": "Salt, iron, lamp-oil, and the only honest map of the outer ring. Everything has a price, and mine are kinder than the Hollow's.",
+          "choices": [
+            { "id": "e_w_vow", "text": "I pay my debts. Always.", "choiceType": "vow", "nextNodeId": "deal", "dispositionEffect": 0.10, "conditions": {}, "effects": { "vow": "vow_pay_debts" } },
+            { "id": "e_w_lie", "text": "Put it on my tab. I am good for it.", "choiceType": "lie", "nextNodeId": "suspicion", "dispositionEffect": -0.03, "conditions": {}, "effects": {} }
+          ]
+        },
+        "cache_talk": {
+          "id": "cache_talk",
+          "speaker": "elena",
+          "text": "Short-handed is one word for it. I keep caches where the desperate cannot reach them. You strike a fair deal — carry for me, and I will show you one.",
+          "choices": [
+            { "id": "e_c_help", "text": "Show me the route. I will carry double.", "choiceType": "help", "nextNodeId": "deal", "dispositionEffect": 0.05, "conditions": {}, "effects": { "reveal": "trade_routes" } },
+            { "id": "e_c_inquire", "text": "Where did the stock come from, originally?", "choiceType": "inquire", "nextNodeId": "suspicion", "dispositionEffect": 0.0, "conditions": {}, "effects": {} }
+          ]
+        },
+        "sharp": {
+          "id": "sharp",
+          "speaker": "elena",
+          "text": "Robbery is taking without asking. I ask first — that is commerce. The price just went up, since we are naming things.",
+          "choices": [
+            { "id": "e_s_defer", "text": "Forget it. I will pay your price.", "choiceType": "defer", "nextNodeId": "deal", "dispositionEffect": 0.05, "conditions": {}, "effects": {} },
+            { "id": "e_s_threaten", "text": "Or I take what I need.", "choiceType": "threaten", "nextNodeId": null, "dispositionEffect": -0.08, "conditions": {}, "effects": { "startDuel": true, "endScene": true } }
+          ]
+        },
+        "suspicion": {
+          "id": "suspicion",
+          "speaker": "elena",
+          "text": "Tabs are for people whose names I know, and origins are for people I trust. You are neither — yet. Buy something or browse elsewhere.",
+          "choices": [
+            { "id": "e_su_defer", "text": "Another time, then.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "deal": {
+          "id": "deal",
+          "speaker": "elena",
+          "text": "Pleasure doing business. Come back with coin or muscle and we will talk about my caches — the ones that are not on any map.",
+          "choices": [
+            { "id": "e_d_leave", "text": "Take your leave.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.0, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        }
+      }
+    },
+    "tree_marcus_watch": {
+      "id": "tree_marcus_watch",
+      "npcId": "marcus",
+      "sceneId": "watchtower_1",
+      "startNodeId": "greeting",
+      "nodes": {
+        "greeting": {
+          "id": "greeting",
+          "speaker": "marcus",
+          "text": "State your business. I have seen your kind pick ruins clean, and the watchtower sees everything.",
+          "choices": [
+            { "id": "m_g_inquire", "text": "What does the watchtower see?", "choiceType": "inquire", "nextNodeId": "watch", "dispositionEffect": 0.0, "conditions": {}, "effects": {} },
+            { "id": "m_g_vow", "text": "I am no enemy of the garrison.", "choiceType": "vow", "nextNodeId": "test", "dispositionEffect": 0.10, "conditions": {}, "effects": {} },
+            { "id": "m_g_threaten", "text": "Stand aside, guard.", "choiceType": "threaten", "nextNodeId": "escalation", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "watch": {
+          "id": "watch",
+          "speaker": "marcus",
+          "text": "Movement in the deep rings. Torches where no patrol walks. The garrison holds this tower, and the tower holds the road.",
+          "choices": [
+            { "id": "m_w_inquire", "text": "Tell me the patrol routes.", "choiceType": "inquire", "nextNodeId": "routes", "dispositionEffect": 0.0, "conditions": { "minDisposition": 0.0 }, "effects": {} },
+            { "id": "m_w_inquire2", "text": "What festers below?", "choiceType": "inquire", "nextNodeId": "stone", "dispositionEffect": 0.0, "conditions": {}, "effects": {} }
+          ]
+        },
+        "routes": {
+          "id": "routes",
+          "speaker": "marcus",
+          "text": "Dawn watch on the east stair, dusk watch on the cistern, and nothing — nothing — walks the processional. Remember that.",
+          "choices": [
+            { "id": "m_r_thanks", "text": "Noted, and appreciated.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "reveal": "garrison_movements", "endScene": true } }
+          ]
+        },
+        "stone": {
+          "id": "stone",
+          "speaker": "marcus",
+          "text": "Not my post. I watch the road, not the dark under it. Ask the priests if you want nightmares priced.",
+          "choices": [
+            { "id": "m_st_defer", "text": "Fair. Watch your road, then.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "test": {
+          "id": "test",
+          "speaker": "marcus",
+          "text": "No enemy, hm. Then answer: a sealed order tells you to bar a door with your own people behind it. What do you do?",
+          "choices": [
+            { "id": "m_t_honest", "text": "I would want to know why first.", "choiceType": "empathize", "nextNodeId": "respect", "dispositionEffect": 0.10, "conditions": {}, "effects": {} },
+            { "id": "m_t_lie", "text": "Obey. Orders are orders.", "choiceType": "lie", "nextNodeId": "escalation", "dispositionEffect": -0.03, "conditions": {}, "effects": {} }
+          ]
+        },
+        "respect": {
+          "id": "respect",
+          "speaker": "marcus",
+          "text": "Hm. An honest answer from an outsider. Maybe the watch has been alone too long. Walk the road — I will say I saw nothing.",
+          "choices": [
+            { "id": "m_re_leave", "text": "The watchtower sees everything except kindness.", "choiceType": "empathize", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "escalation": {
+          "id": "escalation",
+          "speaker": "marcus",
+          "text": "That is what I thought. Draw, then — the tower will witness which of us the garrison would have kept.",
+          "choices": [
+            { "id": "m_e_duel", "text": "Draw.", "choiceType": "threaten", "nextNodeId": null, "dispositionEffect": -0.08, "conditions": {}, "effects": { "startDuel": true, "endScene": true } },
+            { "id": "m_e_defer", "text": "Stand down. I misspoke.", "choiceType": "defer", "nextNodeId": "watch", "dispositionEffect": 0.05, "conditions": {}, "effects": {} }
+          ]
+        }
+      }
+    },
+    "tree_aria_alcove": {
+      "id": "tree_aria_alcove",
+      "npcId": "aria",
+      "sceneId": "merchants_1",
+      "startNodeId": "greeting",
+      "nodes": {
+        "greeting": {
+          "id": "greeting",
+          "speaker": "aria",
+          "text": "Fascinating. You walk like a footnote that lost its page. Every ruin tells a story — and you, stranger, are misfiled.",
+          "choices": [
+            { "id": "a_g_inquire", "text": "What are you researching?", "choiceType": "inquire", "nextNodeId": "research", "dispositionEffect": 0.0, "conditions": {}, "effects": {} },
+            { "id": "a_g_help", "text": "I could use a scholar's eyes.", "choiceType": "help", "nextNodeId": "partnership", "dispositionEffect": 0.05, "conditions": {}, "effects": {} },
+            { "id": "a_g_conceal", "text": "I am no one of interest.", "choiceType": "conceal", "nextNodeId": "probing", "dispositionEffect": -0.03, "conditions": {}, "effects": {} }
+          ]
+        },
+        "research": {
+          "id": "research",
+          "speaker": "aria",
+          "text": "The texts suggest the fall of this place was not a war but a... transaction. I study the ledger. Somewhere in it is a mechanism worth more than gold.",
+          "choices": [
+            { "id": "a_r_inquire", "text": "Share your findings with me.", "choiceType": "inquire", "nextNodeId": "findings", "dispositionEffect": 0.0, "conditions": {}, "effects": { "reveal": "scholar_research" } },
+            { "id": "a_r_inquire2", "text": "What mechanism?", "choiceType": "inquire", "nextNodeId": "deflect", "dispositionEffect": 0.0, "conditions": {}, "effects": {} }
+          ]
+        },
+        "findings": {
+          "id": "findings",
+          "speaker": "aria",
+          "text": "Memory was currency here — spent, loaned, stolen. Whoever held the ledger wrote the laws of what could be wished for. Imagine holding it.",
+          "choices": [
+            { "id": "a_f_empathize", "text": "That ledger ruined everyone it touched.", "choiceType": "empathize", "nextNodeId": "partnership", "dispositionEffect": 0.10, "conditions": {}, "effects": {} },
+            { "id": "a_f_demand", "text": "Hand over your notes.", "choiceType": "demand", "nextNodeId": "chill", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "deflect": {
+          "id": "deflect",
+          "speaker": "aria",
+          "text": "A hypothesis, only. Publish nothing before peer review — especially to armed strangers in dead cities.",
+          "choices": [
+            { "id": "a_d_defer", "text": "Cautious. I respect that.", "choiceType": "defer", "nextNodeId": "partnership", "dispositionEffect": 0.05, "conditions": {}, "effects": {} }
+          ]
+        },
+        "partnership": {
+          "id": "partnership",
+          "speaker": "aria",
+          "text": "A research partnership, then. You walk into places I cannot; I read what you find. Equal shares of the truth, whatever it costs.",
+          "choices": [
+            { "id": "a_p_vow", "text": "Equal shares. Agreed.", "choiceType": "vow", "nextNodeId": null, "dispositionEffect": 0.10, "conditions": { "minDisposition": 0.2 }, "effects": { "recruit": true, "endScene": true } },
+            { "id": "a_p_defer", "text": "I will think on it.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "probing": {
+          "id": "probing",
+          "speaker": "aria",
+          "text": "No one of interest has seams like yours. Your memories do not join up, stranger — I can see the stitching. Whose are they?",
+          "choices": [
+            { "id": "a_pr_conceal", "text": "My own. Leave it.", "choiceType": "conceal", "nextNodeId": "chill", "dispositionEffect": -0.03, "conditions": {}, "effects": {} },
+            { "id": "a_pr_empathize", "text": "I wish I knew.", "choiceType": "empathize", "nextNodeId": "partnership", "dispositionEffect": 0.10, "conditions": {}, "effects": {} }
+          ]
+        },
+        "chill": {
+          "id": "chill",
+          "speaker": "aria",
+          "text": "As you wish. The archive is patient; it has outwaited better secrets than yours.",
+          "choices": [
+            { "id": "a_c_leave", "text": "Take your leave.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.0, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        }
+      }
+    },
+    "tree_thorne_camp": {
+      "id": "tree_thorne_camp",
+      "npcId": "thorne",
+      "sceneId": "thorne_encounter",
+      "startNodeId": "greeting",
+      "nodes": {
+        "greeting": {
+          "id": "greeting",
+          "speaker": "thorne",
+          "text": "Trust gets people killed. Say what you want, take what I say with salt, and go.",
+          "choices": [
+            { "id": "t_g_empathize", "text": "You ran from something. So did I.", "choiceType": "empathize", "nextNodeId": "truth", "dispositionEffect": 0.10, "conditions": {}, "effects": {} },
+            { "id": "t_g_inquire", "text": "Why did you desert?", "choiceType": "inquire", "nextNodeId": "deflect", "dispositionEffect": 0.0, "conditions": {}, "effects": {} },
+            { "id": "t_g_threaten", "text": "Deserters hang, where I come from.", "choiceType": "threaten", "nextNodeId": "steel", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "truth": {
+          "id": "truth",
+          "speaker": "thorne",
+          "text": "Ran. Yes. The sealed orders said the gate stays barred — with the city inside it. I read them. I ran. My whole company stayed and died not knowing what they were holding.",
+          "choices": [
+            { "id": "t_t_vow", "text": "Their names deserve better than silence.", "choiceType": "vow", "nextNodeId": "recruit", "dispositionEffect": 0.10, "conditions": {}, "effects": { "reveal": "garrison_betrayal" } },
+            { "id": "t_t_inquire", "text": "What were the orders, exactly?", "choiceType": "inquire", "nextNodeId": "orders", "dispositionEffect": 0.0, "conditions": {}, "effects": {} }
+          ]
+        },
+        "orders": {
+          "id": "orders",
+          "speaker": "thorne",
+          "text": "Keep the road closed, shoot climbers, tell the ranks it is to keep the dark in. The dark was already in — it wore the commander's seal.",
+          "choices": [
+            { "id": "t_o_empathize", "text": "You could not have unsealed them alone.", "choiceType": "empathize", "nextNodeId": "recruit", "dispositionEffect": 0.10, "conditions": {}, "effects": { "reveal": "garrison_betrayal" } }
+          ]
+        },
+        "deflect": {
+          "id": "deflect",
+          "speaker": "thorne",
+          "text": "I sleep with one eye open and you ask why. The garrison pays its debts in rope, friend. That is the funny version.",
+          "choices": [
+            { "id": "t_d_help", "text": "Then let me watch the other eye tonight.", "choiceType": "help", "nextNodeId": "trust", "dispositionEffect": 0.05, "conditions": {}, "effects": {} },
+            { "id": "t_d_defer", "text": "Keep your secrets, then.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "trust": {
+          "id": "trust",
+          "speaker": "thorne",
+          "text": "Hm. You talk like someone who has stood a watch. Fine — one night. Snore and I am gone before dawn.",
+          "choices": [
+            { "id": "t_tr_inquire", "text": "Tell me about the Hollow's defenses.", "choiceType": "inquire", "nextNodeId": "recruit", "dispositionEffect": 0.0, "conditions": { "minDisposition": 0.1 }, "effects": { "reveal": "hollow_defenses" } }
+          ]
+        },
+        "recruit": {
+          "id": "recruit",
+          "speaker": "thorne",
+          "text": "You do not flinch. That is rarer than courage. My blade is yours — not for the cause. For the names.",
+          "choices": [
+            { "id": "t_re_accept", "text": "For the names, then.", "choiceType": "vow", "nextNodeId": null, "dispositionEffect": 0.10, "conditions": { "minDisposition": 0.2 }, "effects": { "recruit": true, "endScene": true } }
+          ]
+        },
+        "steel": {
+          "id": "steel",
+          "speaker": "thorne",
+          "text": "Then climb down and try the rope. I have killed better friends than you over less.",
+          "choices": [
+            { "id": "t_s_duel", "text": "Draw, deserter.", "choiceType": "threaten", "nextNodeId": null, "dispositionEffect": -0.08, "conditions": {}, "effects": { "startDuel": true, "endScene": true } },
+            { "id": "t_s_defer", "text": "I spoke like a fool. Forget it.", "choiceType": "defer", "nextNodeId": "deflect", "dispositionEffect": 0.05, "conditions": {}, "effects": {} }
+          ]
+        }
+      }
+    },
+    "tree_vessa_shrine": {
+      "id": "tree_vessa_shrine",
+      "npcId": "vessa",
+      "sceneId": "vessa_shrine",
+      "startNodeId": "greeting",
+      "nodes": {
+        "greeting": {
+          "id": "greeting",
+          "speaker": "vessa",
+          "text": "The hollow speaks through stone, and it has been speaking of you. Sit. The incense is black, but it means well.",
+          "choices": [
+            { "id": "v_g_inquire", "text": "What is it saying about me?", "choiceType": "inquire", "nextNodeId": "omen", "dispositionEffect": 0.0, "conditions": {}, "effects": {} },
+            { "id": "v_g_help", "text": "Let me help tend the altar.", "choiceType": "help", "nextNodeId": "altar", "dispositionEffect": 0.05, "conditions": {}, "effects": {} },
+            { "id": "v_g_demand", "text": "Tell me what corrupted this place.", "choiceType": "demand", "nextNodeId": "sickness", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "omen": {
+          "id": "omen",
+          "speaker": "vessa",
+          "text": "That a debt is walking. That something spent a king and kept the change. Faith is not comfort, stranger — it is accurate bookkeeping of the soul.",
+          "choices": [
+            { "id": "v_o_empathize", "text": "Then help me read my own ledger.", "choiceType": "empathize", "nextNodeId": "faith", "dispositionEffect": 0.10, "conditions": {}, "effects": {} },
+            { "id": "v_o_defer", "text": "I keep my own books.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "faith": {
+          "id": "faith",
+          "speaker": "vessa",
+          "text": "The old prayers do not work anymore, so I pray the new way: I listen. Our faith never worshipped the god's glory — it tended the god's grief.",
+          "choices": [
+            { "id": "v_f_listen", "text": "Teach me to listen, then.", "choiceType": "help", "nextNodeId": "altar", "dispositionEffect": 0.05, "conditions": {}, "effects": { "reveal": "hollow_faith" } }
+          ]
+        },
+        "altar": {
+          "id": "altar",
+          "speaker": "vessa",
+          "text": "Steady hands. Good. The altar eats memories, one a month, no more — I feed it mine so it does not wander out hungry. Each year I remember less of the liturgy, and the liturgy remembers more of me.",
+          "choices": [
+            { "id": "v_a_empathize", "text": "That is a terrible price to pay alone.", "choiceType": "empathize", "nextNodeId": "source", "dispositionEffect": 0.10, "conditions": {}, "effects": {} },
+            { "id": "v_a_inquire", "text": "Why does it hunger at all?", "choiceType": "inquire", "nextNodeId": "source", "dispositionEffect": 0.0, "conditions": {}, "effects": {} }
+          ]
+        },
+        "source": {
+          "id": "source",
+          "speaker": "vessa",
+          "text": "Because it is sick, not evil. It is every wish the crown ever answered, with no one left to want them. Grief with nowhere to go settles, and what settles here... wakes.",
+          "choices": [
+            { "id": "v_s_vow", "text": "Then I will help you heal it.", "choiceType": "vow", "nextNodeId": null, "dispositionEffect": 0.10, "conditions": {}, "effects": { "reveal": "corruption_source", "vow": "vow_heal_the_hollow", "endScene": true } }
+          ]
+        },
+        "sickness": {
+          "id": "sickness",
+          "speaker": "vessa",
+          "text": "Demanded truths come dear. Very well: it is not a corruption that fell on this place. It is a mourning the place cannot finish. Now you owe the altar a kindness.",
+          "choices": [
+            { "id": "v_si_help", "text": "Then accept mine — teach me the rite.", "choiceType": "help", "nextNodeId": "source", "dispositionEffect": 0.05, "conditions": { "minDisposition": 0.1 }, "effects": { "reveal": "corruption_source" } },
+            { "id": "v_si_defer", "text": "I have paid enough for one day.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        }
+      }
+    },
+    "tree_echo_audience": {
+      "id": "tree_echo_audience",
+      "npcId": "hollow_king",
+      "sceneId": "deep_hollow_1",
+      "startNodeId": "greeting",
+      "nodes": {
+        "greeting": {
+          "id": "greeting",
+          "speaker": "hollow_king",
+          "text": "Kneel. ...No. Rise. You wear my memories like a beggar wears a king's coat, and yet the coat remembers you. I was a king once.",
+          "choices": [
+            { "id": "h_g_inquire", "text": "What are you?", "choiceType": "inquire", "nextNodeId": "echo_truth", "dispositionEffect": 0.0, "conditions": {}, "effects": {} },
+            { "id": "h_g_demand", "text": "Give me passage to the deep.", "choiceType": "demand", "nextNodeId": "bargain", "dispositionEffect": -0.08, "conditions": {}, "effects": {} },
+            { "id": "h_g_threaten", "text": "I will end you, shade.", "choiceType": "threaten", "nextNodeId": "wrath", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "echo_truth": {
+          "id": "echo_truth",
+          "speaker": "hollow_king",
+          "text": "I am the shape the crown wore. Every wish it answered left a whisper, and the whispers gathered into me. The king himself it spent — and spat out, walking. Look in a mirror, heir.",
+          "choices": [
+            { "id": "h_e_inquire", "text": "The king... is me?", "choiceType": "inquire", "nextNodeId": "heir", "dispositionEffect": 0.0, "conditions": {}, "effects": { "reveal": "king_history" } },
+            { "id": "h_e_lie", "text": "I want nothing of yours.", "choiceType": "lie", "nextNodeId": "bargain", "dispositionEffect": -0.03, "conditions": {}, "effects": {} }
+          ]
+        },
+        "heir": {
+          "id": "heir",
+          "speaker": "hollow_king",
+          "text": "Ash and answer both. What it took, it could not keep; what it could not keep, walks. Power is not given, heir. It is taken — even by accident, even by you.",
+          "choices": [
+            { "id": "h_h_vow", "text": "Then I will take it to free you.", "choiceType": "vow", "nextNodeId": "pact", "dispositionEffect": 0.10, "conditions": {}, "effects": {} },
+            { "id": "h_h_empathize", "text": "You sound tired, not cruel.", "choiceType": "empathize", "nextNodeId": "pact", "dispositionEffect": 0.10, "conditions": {}, "effects": {} }
+          ]
+        },
+        "bargain": {
+          "id": "bargain",
+          "speaker": "hollow_king",
+          "text": "Passage has a price, and I am the only merchant left in this market. Offer a memory — one you will not miss — and the deep opens.",
+          "choices": [
+            { "id": "h_b_offer", "text": "Take one. Choose gently.", "choiceType": "defer", "nextNodeId": "pact", "dispositionEffect": 0.05, "conditions": {}, "effects": { "reveal": "corruption_source" } },
+            { "id": "h_b_refuse", "text": "My memories are not coin.", "choiceType": "demand", "nextNodeId": "wrath", "dispositionEffect": -0.08, "conditions": {}, "effects": {} }
+          ]
+        },
+        "pact": {
+          "id": "pact",
+          "speaker": "hollow_king",
+          "text": "Then walk the processional when you are ready, and remember: the crown is not my crown. It never was. It only let me believe I was its king.",
+          "choices": [
+            { "id": "h_p_leave", "text": "Withdraw from the throne of ashes.", "choiceType": "defer", "nextNodeId": null, "dispositionEffect": 0.05, "conditions": {}, "effects": { "endScene": true } }
+          ]
+        },
+        "wrath": {
+          "id": "wrath",
+          "speaker": "hollow_king",
+          "text": "Kneel, then, and learn what the court learned. I am patient — but the court is hungry, and the court is mine.",
+          "choices": [
+            { "id": "h_w_duel", "text": "Let them come.", "choiceType": "threaten", "nextNodeId": null, "dispositionEffect": -0.08, "conditions": {}, "effects": { "startDuel": true, "endScene": true } },
+            { "id": "h_w_defer", "text": "Forgive me. I spoke in fear.", "choiceType": "defer", "nextNodeId": "echo_truth", "dispositionEffect": 0.05, "conditions": {}, "effects": {} }
+          ]
+        }
+      }
+    }
+  }
+}

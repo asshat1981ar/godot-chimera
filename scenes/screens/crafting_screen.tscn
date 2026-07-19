@@ -1,0 +1,136 @@
+[gd_scene load_steps=2 format=3 uid="uid://craftingscreen001"]
+
+[ext_resource type="Script" path="res://scripts/ui/crafting_screen.gd" id="1_craft"]
+
+[node name="CraftingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_craft")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.05, 0.04, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Crafting"
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="RecipePanel" type="PanelContainer" parent="VBox/HBox"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="VBox/HBox/RecipePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="VBox/HBox/RecipePanel/Margin"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/HBox/RecipePanel/Margin/VBox"]
+layout_mode = 2
+text = "Recipes"
+
+[node name="RecipeList" type="VBoxContainer" parent="VBox/HBox/RecipePanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="DetailPanel" type="PanelContainer" parent="VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="VBox/HBox/DetailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="VBox/HBox/DetailPanel/Margin"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="VBox/HBox/DetailPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Select a recipe"
+
+[node name="DescLabel" type="RichTextLabel" parent="VBox/HBox/DetailPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "..."
+
+[node name="IngredientsLabel" type="Label" parent="VBox/HBox/DetailPanel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="GatesLabel" type="Label" parent="VBox/HBox/DetailPanel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ResultLabel" type="Label" parent="VBox/HBox/DetailPanel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="CraftButton" type="Button" parent="VBox/HBox/DetailPanel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+text = "Craft"
+
+[node name="InventoryPanel" type="PanelContainer" parent="VBox/HBox"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="VBox/HBox/InventoryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="VBox/HBox/InventoryPanel/Margin"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/HBox/InventoryPanel/Margin/VBox"]
+layout_mode = 2
+text = "Inventory"
+
+[node name="InventoryList" type="VBoxContainer" parent="VBox/HBox/InventoryPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="BackButton" type="Button" parent="VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+text = "Back"
+
+[connection signal="pressed" from="VBox/HBox/DetailPanel/Margin/VBox/CraftButton" to="." method="_on_craft_pressed"]
+[connection signal="pressed" from="VBox/BackButton" to="." method="_on_back_pressed"]

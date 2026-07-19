@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://settingsscreen001"]
+[gd_scene load_steps=3 format=3 uid="uid://settingsscreen001"]
 
 [ext_resource type="Script" path="res://scripts/ui/settings_screen.gd" id="1_set"]
+[ext_resource type="Script" path="res://scripts/ui/gothic_button.gd" id="2_gbtn"]
 
 [node name="SettingsScreen" type="Control"]
 layout_mode = 3
@@ -23,34 +24,38 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -240.0
-offset_right = 260.0
-offset_bottom = 240.0
+offset_left = -320.0
+offset_top = -260.0
+offset_right = 320.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 18
 
 [node name="Title" type="Label" parent="VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 40
 text = "Settings"
 horizontal_alignment = 1
 
 [node name="MusicCheck" type="CheckBox" parent="VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
 text = "Music enabled"
 
 [node name="SfxCheck" type="CheckBox" parent="VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
 text = "SFX enabled"
 
 [node name="MotionCheck" type="CheckBox" parent="VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
 text = "Reduced motion"
 
 [node name="AiCheck" type="CheckBox" parent="VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
 text = "Cloud AI dialogue (experimental)"
 
 [node name="SpeedLabel" type="Label" parent="VBox"]
@@ -59,13 +64,16 @@ text = "Text speed: 100%"
 
 [node name="SpeedSlider" type="HSlider" parent="VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
 min_value = 10.0
 max_value = 50.0
 value = 25.0
 
 [node name="BackButton" type="Button" parent="VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
 text = "Back"
+script = ExtResource("2_gbtn")
 
 [connection signal="toggled" from="VBox/MusicCheck" to="." method="_on_music_toggled"]
 [connection signal="toggled" from="VBox/SfxCheck" to="." method="_on_sfx_toggled"]

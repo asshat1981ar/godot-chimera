@@ -13,10 +13,11 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/handheld/orientation=5
+window/handheld/orientation=4
 
 [rendering]
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true
 textures/canvas_textures/default_texture_filter=0
 environment/defaults/default_clear_color=Color(0.06, 0.05, 0.04, 1)
 
@@ -36,6 +37,9 @@ EventBus="*res://scripts/core/event_bus.gd"
 Simulation="*res://scripts/core/simulation.gd"
 SceneSwitcher="*res://scripts/core/scene_switcher.gd"
 Content="*res://scripts/core/content.gd"
+AudioManager="*res://scripts/core/audio_manager.gd"
+UIAdapt="*res://scripts/ui/ui_adapt.gd"
+ToastLayer="*res://scripts/ui/toast_layer.gd"
 
 [layer_names]
 2d_physics/layer_1="terrain"

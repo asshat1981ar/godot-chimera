@@ -1,0 +1,350 @@
+[
+  {
+    "id": "mq_ashes_of_the_hollow",
+    "name": "Ashes of the Hollow",
+    "act": 1,
+    "type": "main",
+    "giverNpcId": "warden",
+    "summary": "Pass the Hollow Gate, learn what the ruin remembers, and stand before the Echo.",
+    "unlockConditions": {},
+    "objectives": [
+      { "id": "mq1_obj_gate", "description": "Win passage at the Hollow Gate", "type": "scene", "targetId": "prologue_scene_1", "count": 1 },
+      { "id": "mq1_obj_echo", "description": "Answer the Echo's first audience", "type": "scene", "targetId": "deep_hollow_1", "count": 1 },
+      { "id": "mq1_obj_history", "description": "Learn the Hollow's history", "type": "reveal", "targetId": "hollow_history", "count": 1 },
+      { "id": "mq1_obj_march", "description": "March the Processional to the throne", "type": "scene", "targetId": "hollow_approach", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "warden": 0.1, "hollow_king": 0.1 },
+      "items": [],
+      "reveals": ["king_history"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "mq_the_crowns_choice",
+    "name": "The Crown's Choice",
+    "act": 2,
+    "type": "main",
+    "giverNpcId": "seren",
+    "summary": "Open the Ashen Gate, win the Reforged, and choose the fate of the crown-shard at the Ashen Throne.",
+    "unlockConditions": { "completedScenes": ["hollow_approach"] },
+    "objectives": [
+      { "id": "mq2_obj_gate", "description": "Pass the Ashen Gate", "type": "scene", "targetId": "ashen_gate", "count": 1 },
+      { "id": "mq2_obj_enclave", "description": "Treat with the Reforged Enclave", "type": "scene", "targetId": "reforged_camp", "count": 1 },
+      { "id": "mq2_obj_forge", "description": "Survive the Forgemaster's Test", "type": "scene", "targetId": "kael_loyalty", "count": 1 },
+      { "id": "mq2_obj_echo", "description": "Face the Echo beyond its domain", "type": "scene", "targetId": "echo_confrontation", "count": 1 },
+      { "id": "mq2_obj_choice", "description": "Choose: destroy, wear, or offer the crown-shard", "type": "choice", "targetId": "crown_choice", "count": 1 },
+      { "id": "mq2_obj_throne", "description": "Stand at the Ashen Throne", "type": "scene", "targetId": "act2_climax", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "seren": 0.1, "kael": 0.1 },
+      "items": [ { "itemId": "king_shard", "quantity": 1 } ],
+      "reveals": ["crown_nature"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "mq_the_hollow_tide",
+    "name": "The Hollow Tide",
+    "act": 3,
+    "type": "main",
+    "giverNpcId": "dara",
+    "summary": "Follow the corruption into the sea, survive its court, and answer it at the Heart of the Tide.",
+    "unlockConditions": { "completedScenes": ["act2_climax"] },
+    "objectives": [
+      { "id": "mq3_obj_shore", "description": "Land on the Broken Shore", "type": "scene", "targetId": "coastal_arrival", "count": 1 },
+      { "id": "mq3_obj_ritual", "description": "Complete the Tide Ritual", "type": "scene", "targetId": "dara_ritual", "count": 1 },
+      { "id": "mq3_obj_fleet", "description": "Sail with the Reforged Fleet", "type": "scene", "targetId": "seren_fleet", "count": 1 },
+      { "id": "mq3_obj_heart", "description": "Answer the Living Corruption", "type": "scene", "targetId": "act3_climax", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": {},
+      "items": [],
+      "reveals": ["corruption_nature"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": [
+        {
+          "id": "ending_purified",
+          "title": "The Quiet Tide",
+          "choice": "purify",
+          "requires": {
+            "items": ["purification_totem"],
+            "completedScenes": ["dara_ritual", "drowned_temple", "ember_sanctum"],
+            "reveals": ["purification_ritual", "corruption_weakness"],
+            "minDisposition": { "vessa": 0.3, "dara": 0.3 },
+            "forbiddenCrownChoice": ["wear"]
+          }
+        },
+        {
+          "id": "ending_crowned",
+          "title": "The Hollow Heir",
+          "choice": "dominate",
+          "requires": {
+            "anyOf": [
+              { "crownChoice": "wear" },
+              { "items": ["king_shard"], "minDisposition": { "hollow_king": -0.2 } }
+            ],
+            "forbiddenItems": ["purification_totem"]
+          }
+        },
+        {
+          "id": "ending_reforged",
+          "title": "Ashes Reforged",
+          "choice": "unmake",
+          "requires": {
+            "completedScenes": ["seren_alliance", "seren_fleet", "kael_loyalty"],
+            "minDisposition": { "seren": 0.3, "kael": 0.3 },
+            "reveals": ["reforged_prophecy", "crown_nature"],
+            "anyOf": [
+              { "crownChoice": "offer" },
+              { "items": ["signal_flare"] }
+            ]
+          }
+        },
+        {
+          "id": "ending_merged",
+          "title": "The Sea Remembers",
+          "choice": "merge",
+          "requires": {
+            "reveals": ["evolution_theory", "corruption_nature", "tide_prophecy"],
+            "completedScenes": ["aria_laboratory", "dara_ritual"],
+            "minDisposition": { "aria": 0.4 },
+            "forbiddenItems": ["purification_totem"],
+            "forbiddenCrownChoice": ["destroy"]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "sq_black_incense",
+    "name": "Black Incense",
+    "act": 1,
+    "type": "side",
+    "giverNpcId": "vessa",
+    "summary": "Gather offerings for the corrupted altar so Vessa can keep the sick god calm a while longer.",
+    "unlockConditions": { "completedScenes": ["vessa_shrine"] },
+    "objectives": [
+      { "id": "sq4_obj_dust", "description": "Gather memory-dust for the censer", "type": "item", "targetId": "memory_dust", "count": 2 },
+      { "id": "sq4_obj_salt", "description": "Bring a salt crystal for the altar rim", "type": "item", "targetId": "salt_crystal", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "vessa": 0.15 },
+      "items": [ { "itemId": "glass_flask", "quantity": 1 } ],
+      "reveals": ["hollow_faith"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_the_watchtower_sees",
+    "name": "The Watchtower Sees",
+    "act": 1,
+    "type": "side",
+    "giverNpcId": "marcus",
+    "summary": "Survive Marcus's interrogation — by word or by Resolve — and the watch will share what it sees.",
+    "unlockConditions": { "completedScenes": ["watchtower_1"] },
+    "objectives": [
+      { "id": "sq5_obj_duel", "description": "Stand your ground against Marcus", "type": "duel", "targetId": "marcus", "count": 1 },
+      { "id": "sq5_obj_moves", "description": "Hear what the watchtower sees", "type": "reveal", "targetId": "garrison_movements", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "marcus": 0.2 },
+      "items": [ { "itemId": "hollow_iron", "quantity": 1 } ],
+      "reveals": [],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_iron_remembers",
+    "name": "Iron Remembers",
+    "act": 2,
+    "type": "side",
+    "giverNpcId": "kael",
+    "summary": "Return hollow iron to the cold forge, and Kael will tell you what he made — and what it cost.",
+    "unlockConditions": { "completedScenes": ["ashen_gate"] },
+    "objectives": [
+      { "id": "sq6_obj_iron", "description": "Carry hollow iron to the forge", "type": "item", "targetId": "hollow_iron", "count": 3 },
+      { "id": "sq6_obj_test", "description": "Stand the Forgemaster's Test", "type": "scene", "targetId": "kael_loyalty", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "kael": 0.15 },
+      "items": [ { "itemId": "forge_ember", "quantity": 2 } ],
+      "reveals": ["forge_history"],
+      "unlockScenes": [],
+      "recipes": ["echo_blade"],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_the_merchants_gambit",
+    "name": "The Merchant's Gambit",
+    "act": 1,
+    "type": "side",
+    "giverNpcId": "elena",
+    "summary": "Recover three of Elena's caches from the outer ring and she will show you what her trust is worth.",
+    "unlockConditions": { "completedScenes": ["outer_ruins_1"] },
+    "objectives": [
+      { "id": "sq1_obj_iron", "description": "Recover hollow iron from the sealed ring", "type": "item", "targetId": "hollow_iron", "count": 2 },
+      { "id": "sq1_obj_routes", "description": "Learn the shape of her trade web", "type": "reveal", "targetId": "trade_routes", "count": 1 },
+      { "id": "sq1_obj_trust", "description": "Prove your worth to Elena", "type": "disposition", "targetId": "elena", "count": 0.3 }
+    ],
+    "rewards": {
+      "disposition": { "elena": 0.1 },
+      "items": [ { "itemId": "memory_dust", "quantity": 2 } ],
+      "reveals": ["supply_cache"],
+      "unlockScenes": ["elena_recruitment"],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_the_key_turner",
+    "name": "The Key-Turner",
+    "act": 1,
+    "type": "side",
+    "giverNpcId": "warden",
+    "summary": "Bring the Warden proof that the gate's dead walk in you, and he will tell you why it was sealed.",
+    "unlockConditions": { "completedScenes": ["prologue_scene_1"], "minDisposition": { "warden": 0.1 } },
+    "objectives": [
+      { "id": "sq2_obj_history", "description": "Learn the Hollow's history", "type": "reveal", "targetId": "hollow_history", "count": 1 },
+      { "id": "sq2_obj_audience", "description": "Stand in the throne of ashes", "type": "scene", "targetId": "deep_hollow_1", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "warden": 0.1 },
+      "items": [],
+      "reveals": ["warden_secret"],
+      "unlockScenes": ["warden_betrayal"],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_the_deserters_oath",
+    "name": "The Deserter's Oath",
+    "act": 1,
+    "type": "side",
+    "giverNpcId": "thorne",
+    "summary": "Hear the truth of the garrison's sealed orders without judgment, and Thorne will lend his blade.",
+    "unlockConditions": { "completedScenes": ["thorne_encounter"] },
+    "objectives": [
+      { "id": "sq3_obj_truth", "description": "Witness the garrison's betrayal", "type": "reveal", "targetId": "garrison_betrayal", "count": 1 },
+      { "id": "sq3_obj_trust", "description": "Earn Thorne's regard", "type": "disposition", "targetId": "thorne", "count": 0.2 }
+    ],
+    "rewards": {
+      "disposition": { "thorne": 0.15 },
+      "items": [],
+      "reveals": ["hollow_defenses"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": ["thorne"],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_field_of_names",
+    "name": "The Field of Names",
+    "act": 2,
+    "type": "side",
+    "giverNpcId": "thorne",
+    "summary": "Walk the planted blades with Thorne and plant the last one — for the comrade no one named.",
+    "unlockConditions": { "completedScenes": ["thorne_encounter"], "minDisposition": { "thorne": 0.2 } },
+    "objectives": [
+      { "id": "sq7_obj_field", "description": "Stand in the Field of Names", "type": "scene", "targetId": "memorial_field", "count": 1 },
+      { "id": "sq7_obj_truth", "description": "Hear the deserter's truth to its end", "type": "reveal", "targetId": "deserter_truth", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "thorne": 0.2, "marcus": 0.1 },
+      "items": [ { "itemId": "king_shard", "quantity": 1 } ],
+      "reveals": [],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_the_scholars_price",
+    "name": "The Scholar's Price",
+    "act": 2,
+    "type": "side",
+    "giverNpcId": "aria",
+    "summary": "Fund Aria's crown research — or quietly sabotage it. Either way, she will show you what the crown is.",
+    "unlockConditions": { "completedScenes": ["merchants_1"] },
+    "objectives": [
+      { "id": "sq8_obj_dust", "description": "Supply memory-dust for the distillation", "type": "item", "targetId": "memory_dust", "count": 3 },
+      { "id": "sq8_obj_choice", "description": "Choose: fund the research or sabotage it", "type": "choice", "targetId": "aria_research_choice", "count": 1 },
+      { "id": "sq8_obj_confession", "description": "Hear the Scholar's Confession", "type": "scene", "targetId": "aria_confession", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "aria": 0.1 },
+      "items": [ { "itemId": "glass_flask", "quantity": 1 } ],
+      "reveals": ["scholar_research", "crown_nature"],
+      "unlockScenes": [],
+      "recipes": ["memory_vial"],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_pearl_ash_ledger",
+    "name": "The Pearl-Ash Ledger",
+    "act": 3,
+    "type": "side",
+    "giverNpcId": "rook",
+    "summary": "Trace Rook's pearl-ash payments to their buyer, and decide what his debt is worth before it comes due.",
+    "unlockConditions": { "completedScenes": ["smugglers_cove"] },
+    "objectives": [
+      { "id": "sq9_obj_secrets", "description": "Read the shape of Rook's ledger", "type": "reveal", "targetId": "faction_secrets", "count": 1 },
+      { "id": "sq9_obj_salt", "description": "Trade salt crystal for the buyer's name", "type": "item", "targetId": "salt_crystal", "count": 2 },
+      { "id": "sq9_obj_betrayal", "description": "Confront the Double Cross in the cove", "type": "scene", "targetId": "rook_betrayal", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "rook": 0.1 },
+      "items": [ { "itemId": "tide_essence", "quantity": 2 } ],
+      "reveals": [],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "sq_tide_offerings",
+    "name": "What the Tide Was Given",
+    "act": 3,
+    "type": "side",
+    "giverNpcId": "dara",
+    "summary": "Recover the offerings the sea has kept, so the purification rite can give them back — properly, this time.",
+    "unlockConditions": { "completedScenes": ["coastal_arrival"] },
+    "objectives": [
+      { "id": "sq10_obj_coral", "description": "Gather purified coral from the wreck-line", "type": "item", "targetId": "purified_coral", "count": 3 },
+      { "id": "sq10_obj_temple", "description": "Bring the offerings to the Drowned Temple", "type": "scene", "targetId": "drowned_temple", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "dara": 0.15, "vessa": 0.1 },
+      "items": [ { "itemId": "tide_essence", "quantity": 1 } ],
+      "reveals": ["purification_ritual", "tide_prophecy"],
+      "unlockScenes": [],
+      "recipes": ["tide_ward"],
+      "recruit": [],
+      "endings": []
+    }
+  }
+]

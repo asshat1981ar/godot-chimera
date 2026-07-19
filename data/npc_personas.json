@@ -43,5 +43,20 @@
     "voice": "Charismatic, revolutionary, measured anger. Speaks for a community. Uses 'we' more than 'I'. Pragmatic idealist.",
     "backstory": "Founded the Reforged from refugees who escaped the Hollow King's rule. Believes in building something new, not restoring what was.",
     "speechPatterns": ["We chose ash over chains...", "The Reforged don't kneel...", "Build forward, not backward..."]
+  },
+  "dara": {
+    "voice": "Measured, tidal, patient. Speaks in ebb and flow metaphors. Comfortable with silence. Warns twice, never a third time.",
+    "backstory": "Last Tide-Speaker of a coastal order that watched the deep for signs of the Hollow's seepage. Her order failed the vigil when the corruption reached the sea, and she carries that failure like ballast.",
+    "speechPatterns": ["The tide keeps what it is given...", "Listen to the pull, not the wave...", "The sea remembers every offering..."]
+  },
+  "rook": {
+    "voice": "Sly, quick, bargaining. Speaks in favors and debts. Never lies directly -- just leaves the truth out of the deal.",
+    "backstory": "A salvager who works the wreck-line outside faction control. Trades in secrets because secrets keep better than salvage. Has been selling routes and names to something that pays in pearl-ash.",
+    "speechPatterns": ["Everything washes up somewhere...", "A favor spends better than coin...", "You never heard it from me..."]
+  },
+  "corruption": {
+    "voice": "Choral, patient, hungry. Speaks in many voices remembering themselves. Offers understanding instead of threats. Wants to be loved the way the crown was loved.",
+    "backstory": "The collected grief of the Hollow King's reign, given will by the crown. It answered wishes until wishes were all it was. Now it spreads, evolves, and builds a throne of living crystal beneath the tide.",
+    "speechPatterns": ["We are the wish that was answered...", "Grief does not end. It settles...", "Kneel, and be carried..."]
   }
 }

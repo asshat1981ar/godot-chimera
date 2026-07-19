@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/world/map_node_token.gd" id="1_ntok"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_node"]
-radius = 24.0
+radius = 84.0
 
 [node name="MapNodeToken" type="Area2D"]
 collision_layer = 2
@@ -20,7 +20,7 @@ offset_left = -64.0
 offset_top = 28.0
 offset_right = 64.0
 offset_bottom = 54.0
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 18
 text = "Node"
 horizontal_alignment = 1
 vertical_alignment = 1

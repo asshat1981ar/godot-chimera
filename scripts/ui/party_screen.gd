@@ -37,4 +37,11 @@ func _toggle_member(id: String) -> void:
 	_refresh()
 
 func _on_back_pressed() -> void:
+	GameState.save_game("auto")
 	SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_back"):
+		get_viewport().set_input_as_handled()
+		GameState.save_game("auto")
+		SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")

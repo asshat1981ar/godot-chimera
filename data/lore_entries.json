@@ -1,0 +1,242 @@
+[
+  {
+    "id": "lore_the_dug_city",
+    "title": "The Dug City",
+    "act": 1,
+    "category": "history",
+    "revealTag": "hollow_history",
+    "unlockedBySceneId": "prologue_scene_1",
+    "relatedNpcId": "warden",
+    "text": "The Hollow was never built; it was dug, hall by hall, into the caldera's throat. Its people said a city that listens to the earth learns to listen to its citizens. They were right. That was the beginning of the end."
+  },
+  {
+    "id": "lore_the_king_who_listened",
+    "title": "The King Who Listened",
+    "act": 1,
+    "category": "history",
+    "revealTag": "king_history",
+    "unlockedBySceneId": "deep_hollow_1",
+    "relatedNpcId": "hollow_king",
+    "text": "Aldric Veyne wore a crown that let him hear every grief in his kingdom and answer it. Each answer cost him one of his own memories. He paid gladly, and when there was nothing left to pay, the crown kept answering anyway."
+  },
+  {
+    "id": "lore_the_heir_of_ash",
+    "title": "The Heir of Ash",
+    "act": 1,
+    "category": "person",
+    "revealTag": "king_identity",
+    "unlockedBySceneId": "warden_betrayal",
+    "relatedNpcId": "hollow_king",
+    "text": "The Echo on the throne is not the king's ghost; it is the shape the crown wore, every answered wish gathered into one voice. The king's true memories did not die. They walk, and they are reading this."
+  },
+  {
+    "id": "lore_the_sealing",
+    "title": "The Sealing",
+    "act": 1,
+    "category": "history",
+    "revealTag": "warden_secret",
+    "unlockedBySceneId": "warden_betrayal",
+    "relatedNpcId": "warden",
+    "text": "On his last lucid night, the king ordered the Hollow Gate sealed with the court and half the city still inside. The gate-captain who turned the key still keeps it. He has never once called it anything but duty."
+  },
+  {
+    "id": "lore_the_sealed_orders",
+    "title": "The Sealed Orders",
+    "act": 1,
+    "category": "history",
+    "revealTag": "garrison_betrayal",
+    "unlockedBySceneId": "thorne_encounter",
+    "relatedNpcId": "thorne",
+    "text": "The garrison was never posted to keep the dark in. The sealed orders were to keep the people in — the road barred, the climbers shot, the ranks told it was mercy. One soldier read the orders and ran. The rest died not knowing."
+  },
+  {
+    "id": "lore_the_watch",
+    "title": "What the Watchtower Sees",
+    "act": 1,
+    "category": "faction",
+    "revealTag": "garrison_movements",
+    "unlockedBySceneId": "watchtower_1",
+    "relatedNpcId": "marcus",
+    "text": "Dawn watch on the east stair, dusk watch on the cistern, nothing on the processional. The garrison is one man and a tower, but the patrol rhythm of a dead army still rules the road."
+  },
+  {
+    "id": "lore_the_sick_god",
+    "title": "The Sick God",
+    "act": 1,
+    "category": "faith",
+    "revealTag": "hollow_faith",
+    "unlockedBySceneId": "vessa_shrine",
+    "relatedNpcId": "vessa",
+    "text": "The Hollow Faith never worshipped the god's glory — it tended the god's grief. When the old prayers stopped working, the last priestess learned a new one: she listens, and she feeds the altar her memories, one a month, no more."
+  },
+  {
+    "id": "lore_what_the_crown_spent",
+    "title": "What the Crown Spent",
+    "act": 1,
+    "category": "revelation",
+    "revealTag": "corruption_source",
+    "unlockedBySceneId": "vessa_shrine",
+    "relatedNpcId": "vessa",
+    "text": "The corruption is not an invader. It is every wish the crown ever answered with no one left to want them — grief with nowhere to go, settled into stone and bone, awake."
+  },
+  {
+    "id": "lore_the_merchants_ledger",
+    "title": "The Merchant's Ledger",
+    "act": 1,
+    "category": "faction",
+    "revealTag": "trade_routes",
+    "unlockedBySceneId": "outer_ruins_1",
+    "relatedNpcId": "elena",
+    "text": "Elena's web is caches and safe roads strung between people who owe her. Commerce persists even here, because hunger does not stop for grief — hers least of all."
+  },
+  {
+    "id": "lore_cache_of_the_dead",
+    "title": "Cache of the Dead",
+    "act": 1,
+    "category": "person",
+    "revealTag": "supply_cache",
+    "unlockedBySceneId": "elena_recruitment",
+    "relatedNpcId": "elena",
+    "text": "Her founding stock was looted from the sealed outer ring — goods pried from houses whose owners never came back. She sold the dead's salt to the living, and calls it survival, and is not wrong, and is not clean."
+  },
+  {
+    "id": "lore_the_forgemasters_oath",
+    "title": "The Forgemaster's Oath",
+    "act": 2,
+    "category": "person",
+    "revealTag": "forge_history",
+    "unlockedBySceneId": "ashen_gate",
+    "relatedNpcId": "kael",
+    "text": "Kael forged the Hollow Crown from hollow iron and a king shard cut from beneath the caldera. When the refugees fled, he sealed the Ashen Gate behind them himself — not on orders. Penance. Iron remembers what the hand would forget."
+  },
+  {
+    "id": "lore_ash_over_chains",
+    "title": "Ash Over Chains",
+    "act": 2,
+    "category": "faction",
+    "revealTag": "reforged_origins",
+    "unlockedBySceneId": "reforged_camp",
+    "relatedNpcId": "seren",
+    "text": "The Reforged are the ones who crawled out and refused to kneel again. They built in the ash what they would not rebuild from the old stones: a camp, a charter, a promise — we chose ash over chains."
+  },
+  {
+    "id": "lore_the_prophecy_of_ash",
+    "title": "The Prophecy of Ash",
+    "act": 2,
+    "category": "prophecy",
+    "revealTag": "reforged_prophecy",
+    "unlockedBySceneId": "seren_alliance",
+    "relatedNpcId": "seren",
+    "text": "The Reforged keep one prophecy: ash chooses its king. Seren hates it. Veyne blood runs in her through a bastard grandmother, and a prophecy about chosen kings is a chain wearing a crown's face."
+  },
+  {
+    "id": "lore_the_crowns_mechanism",
+    "title": "The Crown's Mechanism",
+    "act": 2,
+    "category": "revelation",
+    "revealTag": "crown_nature",
+    "unlockedBySceneId": "aria_confession",
+    "relatedNpcId": "aria",
+    "text": "The crown spends memories as coin — the wearer's first, then anyone's it can reach. Aria has mapped the mechanism down to which memories she would spend first. She calls it research. It is a budget."
+  },
+  {
+    "id": "lore_the_last_blade",
+    "title": "The Last Blade",
+    "act": 2,
+    "category": "history",
+    "revealTag": "deserter_truth",
+    "unlockedBySceneId": "memorial_field",
+    "relatedNpcId": "thorne",
+    "text": "Every rusted blade in the Field of Names is a soldier who stayed. One blade is planted for the man who ran; Thorne digs it in himself each year, and each year someone pulls it out. He does not know who. He hopes."
+  },
+  {
+    "id": "lore_the_long_column",
+    "title": "The Long Column",
+    "act": 2,
+    "category": "faction",
+    "revealTag": "reforged_movements",
+    "unlockedBySceneId": "ash_market",
+    "relatedNpcId": "elena",
+    "text": "Reforged patrols walk the ash roads in threes and tax what moves without their seal. Elena pays in iron and calls it weather. Everyone in the Cinder Market knows the column grows longer each month."
+  },
+  {
+    "id": "lore_wards_of_memory",
+    "title": "Wards of Memory",
+    "act": 1,
+    "category": "revelation",
+    "revealTag": "hollow_defenses",
+    "unlockedBySceneId": "thorne_encounter",
+    "relatedNpcId": "thorne",
+    "text": "The Hollow's wards do not answer force; they answer memory. Doors open for names spoken rightly. Thorne knows which names — he just cannot say all of them out loud."
+  },
+  {
+    "id": "lore_the_grey_water",
+    "title": "The Grey Water",
+    "act": 3,
+    "category": "revelation",
+    "revealTag": "coastal_corruption",
+    "unlockedBySceneId": "coastal_arrival",
+    "relatedNpcId": "dara",
+    "text": "The seep reached the sea years ago, when someone gave the deep a keystone to keep. Now the tide brings offerings no one asked for, and the wreck-line walks at low water."
+  },
+  {
+    "id": "lore_what_the_tide_keeps",
+    "title": "What the Tide Keeps",
+    "act": 3,
+    "category": "prophecy",
+    "revealTag": "tide_prophecy",
+    "unlockedBySceneId": "coastal_arrival",
+    "relatedNpcId": "dara",
+    "text": "The Tide-Speakers teach one sentence: the tide keeps what it is given — until it is answered. What was given in fear is kept in kind. What is answered with witness, the sea gives back."
+  },
+  {
+    "id": "lore_the_rite_of_salt",
+    "title": "The Rite of Salt",
+    "act": 3,
+    "category": "faith",
+    "revealTag": "purification_ritual",
+    "unlockedBySceneId": "drowned_temple",
+    "relatedNpcId": "vessa",
+    "text": "Purification is not a war; it is a witness. Name the grief truly, lay salt at its threshold, and cut it free with unmade iron. It always costs a memory. The only choice is whose."
+  },
+  {
+    "id": "lore_the_living_grief",
+    "title": "The Living Grief",
+    "act": 3,
+    "category": "revelation",
+    "revealTag": "corruption_nature",
+    "unlockedBySceneId": "aria_laboratory",
+    "relatedNpcId": "aria",
+    "text": "The samples respond to kindness as if burned. The corruption is alive, and it is afraid — a kingdom's mourning with a will, learning the shape of every hand raised against it."
+  },
+  {
+    "id": "lore_it_learns",
+    "title": "It Learns",
+    "act": 3,
+    "category": "revelation",
+    "revealTag": "evolution_theory",
+    "unlockedBySceneId": "aria_laboratory",
+    "relatedNpcId": "aria",
+    "text": "Every fix fails because it studies the fix. Salt thins it, so it grows a shell; wards bind it, so it learns the words. Nothing applied twice works twice. Only a conscience could change what it is."
+  },
+  {
+    "id": "lore_unmade_iron",
+    "title": "Unmade Iron",
+    "act": 3,
+    "category": "revelation",
+    "revealTag": "corruption_weakness",
+    "unlockedBySceneId": "salvage_yard",
+    "relatedNpcId": "kael",
+    "text": "What was forged can be unmade. Hollow iron quenched in tide-essence remembers being ore, and the corruption cannot hold a shape against it. Kael's hammer is the only one left that knows the quench-song."
+  },
+  {
+    "id": "lore_the_pearl_ash_buyer",
+    "title": "The Pearl-Ash Buyer",
+    "act": 3,
+    "category": "faction",
+    "revealTag": "faction_secrets",
+    "unlockedBySceneId": "smugglers_cove",
+    "relatedNpcId": "rook",
+    "text": "Rook's ledger balances in pearl-ash: routes, names, and schedules sold to a buyer who pays below market and above suspicion. The buyer does not sleep, does not haggle, and signs with a tide-mark."
+  }
+]

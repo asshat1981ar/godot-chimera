@@ -14,6 +14,10 @@ func _ready() -> void:
 	_test_party_management()
 	_test_duel_resolution()
 	_test_scene_completion_unlocks_gates()
+	_test_save_slot_roundtrip()
+	_test_seeded_determinism()
+	_test_delayed_disposition_turn_counter()
+	_test_data_integrity()
 	print("=== Results: %d passed, %d failed ===" % [_passed, _failed])
 	get_tree().quit(_failed)
 
@@ -42,9 +46,9 @@ func _test_travel_unlocks_node() -> void:
 func _test_disposition_feedback() -> void:
 	print("Test: dialogue choice affects disposition")
 	GameState.new_game()
-	var before := GameState.get_disposition("warden")
+	var before: float = GameState.get_disposition("warden")
 	Simulation.apply_dialogue_choice("warden", "empathize")
-	var after := GameState.get_disposition("warden")
+	var after: float = GameState.get_disposition("warden")
 	_assert(after > before, "empathize raises warden disposition")
 
 func _test_party_management() -> void:
@@ -72,3 +76,81 @@ func _test_scene_completion_unlocks_gates() -> void:
 	Simulation.end_scene("prologue_scene_1")
 	_assert(GameState.is_scene_completed("prologue_scene_1"), "prologue completed")
 	_assert(GameState.is_node_unlocked("deep_hollow"), "deep_hollow unlocked by disposition+scene")
+
+func _test_save_slot_roundtrip() -> void:
+	print("Test: save slot roundtrip")
+	GameState.new_game()
+	GameState.add_to_party("aria")
+	GameState.adjust_disposition("warden", 0.25)
+	GameState.add_inventory("purified_coral", 3)
+	GameState.rng_seed = 12345
+	GameState.add_pending_disposition("warden", -0.05, 2)
+	GameState.save_game("test")
+
+	GameState.new_game()
+	var loaded: bool = GameState.load_game("test")
+	_assert(loaded, "test slot loads")
+	_assert(GameState.party.has("aria"), "party persists")
+	_assert(absf(GameState.get_disposition("warden") - 0.25) < 0.001, "disposition persists")
+	_assert(int(GameState.inventory.get("purified_coral", 0)) == 3, "inventory persists")
+	_assert(GameState.rng_seed == 12345, "rng_seed persists")
+	_assert(GameState.pending_dispositions.has("2"), "pending_dispositions persist")
+	# Cleanup.
+	var dir := DirAccess.open("user://")
+	if dir:
+		dir.remove("save_test.json")
+
+func _test_seeded_determinism() -> void:
+	print("Test: seeded duel determinism")
+	GameState.new_game()
+	Simulation.set_rng_seed(777)
+	Simulation.start_duel("warden")
+	var result_a: Dictionary = Simulation.duel_round("strike", "defend")
+	var winner_a: String = Simulation.get_duel_winner()
+
+	GameState.new_game()
+	Simulation.set_rng_seed(777)
+	Simulation.start_duel("warden")
+	var result_b: Dictionary = Simulation.duel_round("strike", "defend")
+	var winner_b: String = Simulation.get_duel_winner()
+
+	_assert(result_a.get("log", "") == result_b.get("log", ""), "first turn log matches")
+	_assert(result_a.get("player_resolve", -1) == result_b.get("player_resolve", -2), "player resolve matches")
+	_assert(winner_a == winner_b, "winner state matches")
+
+func _test_delayed_disposition_turn_counter() -> void:
+	print("Test: delayed disposition uses turn counters")
+	GameState.new_game()
+	GameState.add_pending_disposition("warden", -0.1, 2)
+	var before: float = GameState.get_disposition("warden")
+	GameState.consume_pending_dispositions()
+	var mid: float = GameState.get_disposition("warden")
+	GameState.consume_pending_dispositions()
+	var after: float = GameState.get_disposition("warden")
+	_assert(mid == before, "disposition unchanged after first turn")
+	_assert(after < before - 0.05, "disposition applied after second turn")
+
+func _test_data_integrity() -> void:
+	print("Test: data integrity -- all referenced ids resolve")
+	var item_ids := {}
+	for item in Content.items():
+		item_ids[item.get("id", "")] = true
+
+	var recipe_count := 0
+	for recipe in Content.recipes():
+		recipe_count += 1
+		var result_id: String = recipe.get("resultItemId", "")
+		# Result id is intentionally also an item id.
+		_assert(item_ids.has(result_id), "recipe result '%s' exists in items" % result_id)
+		var raw: Variant = recipe.get("ingredientsJson", "")
+		var ingredients: Array = []
+		if raw is String and not (raw as String).is_empty():
+			var parsed: Variant = JSON.parse_string(raw as String)
+			if parsed is Array:
+				ingredients = parsed
+		elif raw is Array:
+			ingredients = raw
+		for ingredient in ingredients:
+			var ing_id: String = ingredient.get("itemId", "")
+			_assert(item_ids.has(ing_id), "recipe ingredient '%s' exists in items" % ing_id)
+	_assert(recipe_count > 0, "at least one recipe loaded")

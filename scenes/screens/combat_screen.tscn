@@ -1,0 +1,86 @@
+[gd_scene load_steps=2 format=3 uid="uid://combatscreen0001"]
+
+[ext_resource type="Script" path="res://scripts/ui/combat_screen.gd" id="1_combat"]
+
+[node name="CombatScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_combat")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.05, 0.04, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="TopBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="OpponentName" type="Label" parent="VBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "Opponent"
+horizontal_alignment = 1
+
+[node name="Bars" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PlayerResolve" type="ProgressBar" parent="VBox/Bars"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 10.0
+value = 10.0
+
+[node name="OpponentResolve" type="ProgressBar" parent="VBox/Bars"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 10.0
+value = 10.0
+
+[node name="OmenLabel" type="Label" parent="VBox/Bars"]
+layout_mode = 2
+text = "Omen: 3"
+
+[node name="TurnLog" type="RichTextLabel" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "..."
+scroll_following = true
+
+[node name="IntentGrid" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ResultLabel" type="Label" parent="VBox"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Result"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="VBox"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 84)
+text = "Continue"
+
+[connection signal="pressed" from="VBox/ContinueButton" to="." method="_on_continue_pressed"]

@@ -18,8 +18,18 @@ var _npcs: Array = []
 var _personas: Dictionary = {}
 var _maps: Dictionary = {1: [], 2: [], 3: []}
 var _scenes: Dictionary = {1: [], 2: [], 3: []}
+const QUESTS_PATH := "res://data/quests.json"
+const DIALOGUE_TREES_PATH := "res://data/dialogue_trees.json"
+const LORE_ENTRIES_PATH := "res://data/lore_entries.json"
+const ITEMS_PATH := "res://data/items.json"
+
+var _quests: Array = []
+var _dialogue_trees: Dictionary = {}
+var _lore_entries: Array = []
+var _items: Array = []
 var _recipes: Array = []
 var _combat_intents: Dictionary = {}
+
 
 func _ready() -> void:
 	_load_json()
@@ -35,16 +45,27 @@ func _load_json() -> void:
 	_scenes[3] = _read_json(ACT3_SCENES_PATH)
 	_recipes = _read_json(RECIPES_PATH)
 	_combat_intents = _read_json(COMBAT_INTENTS_PATH)
+	# New authored narrative content. Items.json may not exist yet (SYS authors in parallel).
+	_quests = _read_json(QUESTS_PATH)
+	_dialogue_trees = _read_json(DIALOGUE_TREES_PATH)
+	_lore_entries = _read_json(LORE_ENTRIES_PATH)
+	_items = _read_json(ITEMS_PATH) if FileAccess.file_exists(ITEMS_PATH) else []
 
 func _read_json(path: String) -> Variant:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if not file:
 		push_warning("Could not read content JSON: %s" % path)
-		return []
+		return _default_for_path(path)
 	var text := file.get_as_text()
 	file.close()
 	var parsed: Variant = JSON.parse_string(text)
-	return parsed if parsed != null else []
+	return parsed if parsed != null else _default_for_path(path)
+
+func _default_for_path(path: String) -> Variant:
+	# Keep downstream lookup stable when a file is missing.
+	if path == DIALOGUE_TREES_PATH:
+		return {"version": 1, "trees": {}}
+	return []
 
 func npcs() -> Array:
 	return _npcs
@@ -106,3 +127,55 @@ func recipes() -> Array:
 
 func combat_intents() -> Dictionary:
 	return _combat_intents
+
+func quests() -> Array:
+	return _quests
+
+func quest(id: String) -> Dictionary:
+	for q in _quests:
+		if q.get("id", "") == id:
+			return q
+	return {}
+
+func dialogue_tree(id: String) -> Dictionary:
+	return _dialogue_trees.get("trees", {}).get(id, {})
+
+func dialogue_tree_for(scene_id: String, npc_id: String) -> Dictionary:
+	var trees: Dictionary = _dialogue_trees.get("trees", {})
+	for tree_id in trees:
+		var tree: Dictionary = trees[tree_id]
+		if tree.get("sceneId", "") == scene_id and tree.get("npcId", "") == npc_id:
+			return tree
+	return {}
+
+func lore_entries() -> Array:
+	return _lore_entries
+
+func lore_entry(id: String) -> Dictionary:
+	for entry in _lore_entries:
+		if entry.get("id", "") == id:
+			return entry
+	return {}
+
+func lore_entries_by_reveal(reveal_tag: String) -> Array:
+	var out: Array = []
+	for entry in _lore_entries:
+		if entry.get("revealTag", "") == reveal_tag:
+			out.append(entry)
+	return out
+
+func lore_entries_by_scene(scene_id: String) -> Array:
+	var out: Array = []
+	for entry in _lore_entries:
+		if entry.get("unlockedBySceneId", "") == scene_id:
+			out.append(entry)
+	return out
+
+func items() -> Array:
+	return _items
+
+func item(id: String) -> Dictionary:
+	for it in _items:
+		if it.get("id", "") == id:
+			return it
+	return {}

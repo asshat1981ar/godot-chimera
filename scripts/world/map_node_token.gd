@@ -41,17 +41,21 @@ func _on_body_entered(_body: Node2D) -> void:
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if not GameState.is_node_unlocked(node_id):
-			EventBus.emit_ui_request("node_locked", {"node_id": node_id})
-			return
-		var node := Content.node_by_id(node_id)
-		var scene := Content.scene_by_id(node.get("sceneId", ""))
-		var npc_id: String = scene.get("npcId", "") if not scene.is_empty() else ""
-		if not npc_id.is_empty():
-			Simulation.travel_to(node_id)
-			SceneSwitcher.switch_to("res://scenes/screens/dialogue_screen.tscn", {"npc_id": npc_id})
-		else:
-			Simulation.travel_to(node_id)
+		select()
+
+func select() -> void:
+	## Public entry point used by mouse clicks and by the camera tap raycast.
+	if not GameState.is_node_unlocked(node_id):
+		EventBus.emit_ui_request("node_locked", {"node_id": node_id})
+		return
+	var node := Content.node_by_id(node_id)
+	var scene := Content.scene_by_id(node.get("sceneId", ""))
+	var npc_id: String = scene.get("npcId", "") if not scene.is_empty() else ""
+	if not npc_id.is_empty():
+		Simulation.travel_to(node_id)
+		SceneSwitcher.switch_to("res://scenes/screens/dialogue_screen.tscn", {"npc_id": npc_id})
+	else:
+		Simulation.travel_to(node_id)
 
 func _on_mouse_entered() -> void:
 	EventBus.emit_ui_request("show_tooltip", {"text": node_name})

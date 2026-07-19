@@ -6,16 +6,23 @@ const MAP_WIDTH := 1280
 const MAP_HEIGHT := 720
 const TILE_SIZE := 64
 const NODE_SCALE := 96
+const QUICK_BAR_WIDTH := 96.0
+const BUTTON_MIN_SIZE := 84.0
 
 @onready var _world: Node2D = $World
 @onready var _camera: Camera2D = $Camera2D
 @onready var _hud: CanvasLayer = $HUD
 @onready var _node_info: RichTextLabel = $HUD/Panel/Margin/VBox/NodeInfoLabel
 @onready var _act_label: Label = $HUD/TopBar/ActLabel
+@onready var _pause_menu: Control = $HUD/PauseMenu
+@onready var _quick_bar: Control = $HUD/QuickBar
+@onready var _journal_badge: Label = $HUD/QuickBar/Margin/VBox/JournalButton/JournalBadge
 
 var _node_token_scene := preload("res://scenes/world/map_node_token.tscn")
 var _npc_token_scene := preload("res://scenes/world/npc_token.tscn")
 var _connections: Line2D
+var _ui_adapt := UIAdapt.new()
+var _journal_pending := 0
 
 func _ready() -> void:
 	GameState.current_phase = GameState.Phase.OVERWORLD
@@ -25,7 +32,13 @@ func _ready() -> void:
 	_camera.focus_on(_node_position(GameState.current_node_id), 1.0)
 	EventBus.ui_request.connect(_on_ui_request)
 	EventBus.node_visited.connect(_on_node_visited)
+	EventBus.journal_updated.connect(_on_journal_updated)
 	_act_label.text = "Act %d" % GameState.current_act
+	add_child(_ui_adapt)
+	_apply_safe_area()
+	get_tree().root.size_changed.connect(_apply_safe_area)
+	_refresh_journal_badge()
+	_pause_menu.hide()
 
 func _build_map() -> void:
 	# Procedural tile grid using simple colored parchment tiles.
@@ -147,5 +160,73 @@ func _on_journal_button_pressed() -> void:
 	SceneSwitcher.switch_to("res://scenes/screens/journal_screen.tscn")
 
 func _on_menu_button_pressed() -> void:
+	_toggle_pause_menu()
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_back"):
+		get_viewport().set_input_as_handled()
+		if _pause_menu.visible:
+			_toggle_pause_menu()
+		else:
+			_toggle_pause_menu()
+
+func _toggle_pause_menu() -> void:
+	_pause_menu.visible = not _pause_menu.visible
+
+func _on_continue_button_pressed() -> void:
+	_toggle_pause_menu()
+
+func _on_pause_settings_pressed() -> void:
+	GameState.save_game()
+	SceneSwitcher.switch_to("res://scenes/screens/settings_screen.tscn")
+
+func _on_pause_main_menu_pressed() -> void:
 	GameState.save_game()
 	SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")
+
+func _on_pause_quit_pressed() -> void:
+	GameState.save_game()
+	get_tree().quit()
+
+func _on_quick_camp_pressed() -> void:
+	GameState.save_game()
+	Simulation.rest_at_camp()
+	SceneSwitcher.switch_to("res://scenes/screens/camp_screen.tscn")
+
+func _on_quick_party_pressed() -> void:
+	GameState.save_game()
+	SceneSwitcher.switch_to("res://scenes/screens/party_screen.tscn")
+
+func _on_quick_journal_pressed() -> void:
+	GameState.save_game()
+	_journal_pending = 0
+	_refresh_journal_badge()
+	SceneSwitcher.switch_to("res://scenes/screens/journal_screen.tscn")
+
+func _on_quick_settings_pressed() -> void:
+	GameState.save_game()
+	SceneSwitcher.switch_to("res://scenes/screens/settings_screen.tscn")
+
+func _on_journal_updated(_entry_id: String) -> void:
+	_journal_pending += 1
+	_refresh_journal_badge()
+
+func _refresh_journal_badge() -> void:
+	_journal_badge.text = str(_journal_pending)
+	_journal_badge.visible = _journal_pending > 0
+
+func _apply_safe_area() -> void:
+	var viewport_size := get_viewport_rect().size
+	var safe: Rect2 = DisplayServer.get_display_safe_area()
+	var full := get_window().get_visible_rect().size
+	var sx := maxf(full.x, 1.0)
+	var sy := maxf(full.y, 1.0)
+	var left := (safe.position.x / sx) * viewport_size.x
+	var top := (safe.position.y / sy) * viewport_size.y
+	var right := ((sx - safe.end.x) / sx) * viewport_size.x
+	var bottom := ((sy - safe.end.y) / sy) * viewport_size.y
+	_ui_adapt.apply_margins($HUD/TopBar, left, top, right, 0.0)
+	_ui_adapt.apply_margins($HUD/Panel, left, 0.0, right, bottom)
+	_ui_adapt.apply_margins($HUD/QuickBar, left, top, right, bottom)
+	_ui_adapt.apply_margins($HUD/PauseMenu, left, top, right, bottom)
+
