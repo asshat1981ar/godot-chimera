@@ -1,0 +1,49 @@
+GIMP Palette
+Name: Chimera Ashes of the Hollow King
+Columns: 7
+#
+# ─── Group P: Parchment & Paper ───────────────────────────────────────────────
+232 213 176	P1 Primary Parchment
+212 190 148	P2 Aged Parchment
+191 168 128	P3 Dark Parchment
+242 232 210	P4 Pale Vellum
+168 144 112	P5 Linen Shadow
+237 232 224	P6 Ash White
+#
+# ─── Group I: Ink & Dark ──────────────────────────────────────────────────────
+ 26  20  16	I1 Primary Ink
+ 61  43  31	I2 Sepia Ink
+ 92  68  51	I3 Faded Ink
+ 74  46  30	I4 Rust Ink
+ 37  40  48	I5 Storm Ink
+#
+# ─── Group G: Antique Gold ────────────────────────────────────────────────────
+201 168  76	G1 Antique Gold
+168 134  60	G2 Burnished Gold
+223 194 120	G3 Pale Gold
+122  94  40	G4 Dark Gold
+201 168  76	G5 Gold Wash 15pct (use at 0.15 alpha)
+#
+# ─── Group A: Ash & Bone ──────────────────────────────────────────────────────
+140 130 120	A1 Ash Grey
+ 80  72  68	A2 Deep Ash
+207 195 168	A3 Bone
+#
+# ─── State Colours ────────────────────────────────────────────────────────────
+140  47  47	R1 Hollow Crimson (hostile)
+ 94  26  26	R2 Dried Blood (danger)
+ 46  92  92	B1 Hollow Teal (trusted)
+ 74 138 138	B2 Pale Teal (positive)
+#
+# ─── Act Accent Hues (environment/map only — forbidden in UI chrome) ──────────
+196 120  32	E1 Act1 Amber The Ashfields
+ 74  88 112	E2 Act2 Slate The Hollow Reaches
+ 90  56 112	E3 Act3 Violet The Kings Throne
+#
+# ─── Derived Composites (reference only — not standalone swatches) ────────────
+# These are computed at runtime via modulate or shader:
+#  Hidden node: A1 at 30% opacity over map background
+#  Gold Wash overlay: G5 at 15% alpha over P1/P2
+#  Danger panel border: R1 added as inner border at full opacity
+#  Hostile portrait tint: R1 at 25% modulate
+#  Trusted portrait tint: B2 at 20% modulate
