@@ -1,0 +1,85 @@
+[gd_scene load_steps=2 format=3 uid="uid://dialoguescreen001"]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue_screen.gd" id="1_dlg"]
+
+[node name="DialogueScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dlg")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.05, 0.04, 1)
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+
+[node name="PortraitPanel" type="PanelContainer" parent="HBox"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="HBox/PortraitPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="HBox/PortraitPanel/Margin"]
+layout_mode = 2
+
+[node name="Portrait" type="TextureRect" parent="HBox/PortraitPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+expand_mode = 3
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="HBox/PortraitPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "NPC"
+horizontal_alignment = 1
+
+[node name="DispositionBar" type="ProgressBar" parent="HBox/PortraitPanel/Margin/VBox"]
+layout_mode = 2
+max_value = 100.0
+value = 50.0
+
+[node name="DialoguePanel" type="PanelContainer" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="HBox/DialoguePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="HBox/DialoguePanel/Margin"]
+layout_mode = 2
+
+[node name="TextBox" type="RichTextLabel" parent="HBox/DialoguePanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "..."
+bbcode_enabled = true
+
+[node name="Choices" type="VBoxContainer" parent="HBox/DialoguePanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8

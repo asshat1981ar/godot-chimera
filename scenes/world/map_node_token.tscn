@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://node_token_0001"]
+
+[ext_resource type="Script" path="res://scripts/world/map_node_token.gd" id="1_ntok"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_node"]
+radius = 24.0
+
+[node name="MapNodeToken" type="Area2D"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_ntok")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_node")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -64.0
+offset_top = 28.0
+offset_right = 64.0
+offset_bottom = 54.0
+theme_override_font_sizes/font_size = 14
+text = "Node"
+horizontal_alignment = 1
+vertical_alignment = 1

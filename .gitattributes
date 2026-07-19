@@ -1,0 +1,18 @@
+# Normalize EOL for all text files
+* text=auto eol=lf
+# Godot-specific
+*.tscn text eol=lf
+*.tres text eol=lf
+*.gd text eol=lf
+*.cs text eol=lf
+*.import filter=lfs diff=lfs merge=lfs -text
+# Binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ogg binary
+*.mp3 binary
+*.wav binary
+*.ttf binary
+*.otf binary

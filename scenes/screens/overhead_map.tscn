@@ -1,0 +1,111 @@
+[gd_scene load_steps=5 format=3 uid="uid://overheadmap001"]
+
+[ext_resource type="Script" path="res://scripts/world/overhead_map.gd" id="1_omap"]
+[ext_resource type="Script" path="res://scripts/world/map_camera.gd" id="2_cam"]
+[ext_resource type="Shader" path="res://assets/shaders/ink_wash.gdshader" id="3_shader"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ink"]
+width = 512
+height = 512
+
+[node name="OverheadMap" type="Node2D"]
+script = ExtResource("1_omap")
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+anchor_mode = 0
+script = ExtResource("2_cam")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="PanelContainer" parent="HUD"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+grow_horizontal = 2
+
+[node name="ActLabel" type="Label" parent="HUD/TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Act 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Panel" type="PanelContainer" parent="HUD"]
+custom_minimum_size = Vector2(280, 160)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -296.0
+offset_top = -176.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="HUD/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Panel/Margin"]
+layout_mode = 2
+
+[node name="NodeInfoLabel" type="RichTextLabel" parent="HUD/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Select a node to travel."
+bbcode_enabled = true
+fit_content = true
+
+[node name="BottomBar" type="HBoxContainer" parent="HUD"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -64.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="CampButton" type="Button" parent="HUD/BottomBar"]
+layout_mode = 2
+text = "Camp"
+
+[node name="PartyButton" type="Button" parent="HUD/BottomBar"]
+layout_mode = 2
+text = "Party"
+
+[node name="JournalButton" type="Button" parent="HUD/BottomBar"]
+layout_mode = 2
+text = "Journal"
+
+[node name="MenuButton" type="Button" parent="HUD/BottomBar"]
+layout_mode = 2
+text = "Menu"
+
+[node name="InkWash" type="ColorRect" parent="HUD"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.05, 0.04, 0.35)
+
+[connection signal="pressed" from="HUD/BottomBar/CampButton" to="." method="_on_camp_button_pressed"]
+[connection signal="pressed" from="HUD/BottomBar/PartyButton" to="." method="_on_party_button_pressed"]
+[connection signal="pressed" from="HUD/BottomBar/JournalButton" to="." method="_on_journal_button_pressed"]
+[connection signal="pressed" from="HUD/BottomBar/MenuButton" to="." method="_on_menu_button_pressed"]

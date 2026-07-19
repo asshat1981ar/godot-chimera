@@ -1,0 +1,19 @@
+# Godot
+.import/
+export.cfg
+*.tmp
+# Imported translations
+*.translation
+# Mono / C#
+.mono/
+data_*/
+# Build
+/android/
+# Editor
+.godot/
+.editor_settings-4.tres
+# Bundled tools (large; keep local-only)
+.tools/
+# OS
+.DS_Store
+Thumbs.db
