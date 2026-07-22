@@ -23,6 +23,8 @@ var unlocked_lore: Array[String] = [] # lore entry ids from data/lore_entries.js
 var rng_seed: int = 0
 ## Pending delayed-disposition changes as turn counters (turn_remaining -> Array[{npc_id,delta}]).
 var pending_dispositions: Dictionary = {}
+## Dev/debug flags. Never autosaved and always reset on new_game. Harmless in release.
+var dev_flags: Dictionary = {}
 var settings: Dictionary = {
 	"music_enabled": true,
 	"sfx_enabled": true,
@@ -185,8 +187,10 @@ func new_game() -> void:
 	quest_states.clear()
 	unlocked_lore.clear()
 	pending_dispositions.clear()
+	dev_flags.clear()
 	rng_seed = int(Time.get_unix_time_from_system())
 	_unlock_gates()
+	_activate_unlocked_quests()
 	EventBus.emit_state_changed("new_game", true)
 	_autosave()
 
@@ -215,6 +219,18 @@ func _deserialize(data: Dictionary) -> void:
 	rng_seed = int(data.get("rng_seed", 0))
 	pending_dispositions = data.get("pending_dispositions", {})
 	settings.merge(data.get("settings", {}), true)
+	# dev_flags are intentionally not restored from save.
+	# Re-activate any quests whose unlock conditions are met after loading.
+	_activate_unlocked_quests()
+
+func _activate_unlocked_quests() -> void:
+	for q in Content.quests():
+		var quest_id: String = q.get("id", "")
+		if quest_states.has(quest_id):
+			continue
+		var unlock: Dictionary = q.get("unlockConditions", {})
+		if unlock.is_empty():
+			quest_states[quest_id] = {"status": "active", "objectives": {}}
 
 func _migrate(data: Dictionary, schema: int) -> Dictionary:
 	if schema < 1:
@@ -243,6 +259,15 @@ func unlock_lore(entry_id: String) -> void:
 		unlocked_lore.append(entry_id)
 		EventBus.emit_state_changed("unlocked_lore", unlocked_lore.duplicate())
 
+func set_dev_flag(key: String, value: Variant) -> void:
+	dev_flags[key] = value
+
+func get_dev_flag(key: String, default: Variant = false) -> Variant:
+	return dev_flags.get(key, default)
+
+func has_dev_flag(key: String) -> bool:
+	return dev_flags.has(key) and dev_flags[key]
+
 func _assign_string_array(target: Array[String], source: Array) -> void:
 	target.clear()
 	for item in source:
@@ -253,6 +278,7 @@ func advance_act(next_act: int) -> void:
 	current_act = next_act
 	current_node_id = ""
 	_unlock_gates()
+	_activate_unlocked_quests()
 	EventBus.emit_state_changed("current_act", current_act)
 	EventBus.emit_act_advanced(current_act)
 	_autosave()

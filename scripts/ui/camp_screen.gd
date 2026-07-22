@@ -26,6 +26,18 @@ func _ready() -> void:
 	_log_label.text = "The fire burns low. Rest grants no answers, only strength to walk further into the ashes."
 	_build_summary()
 	_toast_saved()
+	_setup_focus()
+
+func _setup_focus() -> void:
+	# Only one primary action on this screen: Continue.
+	var continue_btn: Button = $VBox/ContinueButton
+	continue_btn.focus_mode = Control.FOCUS_ALL
+	continue_btn.grab_focus()
+	var menu_btn: Button = $VBox/MenuButton
+	if menu_btn:
+		menu_btn.focus_mode = Control.FOCUS_ALL
+		continue_btn.focus_neighbor_bottom = menu_btn.get_path()
+		menu_btn.focus_neighbor_top = continue_btn.get_path()
 
 func _take_snapshot() -> void:
 	_start_dispositions.clear()
@@ -119,6 +131,7 @@ func _toast_saved() -> void:
 	# Autosave already happened in Simulation.rest_at_camp, so just show a toast.
 	if SceneSwitcher:
 		SceneSwitcher.toast("Saved", 1.5)
+	Haptics.play(30)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_back"):

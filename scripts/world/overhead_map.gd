@@ -45,6 +45,7 @@ func _ready() -> void:
 	_refresh_journal_badge()
 	_refresh_camp_badge()
 	_pause_menu.hide()
+	_setup_quick_bar_focus()
 
 func _build_map() -> void:
 	# Procedural tile grid using simple colored parchment tiles.
@@ -148,6 +149,7 @@ func _on_node_visited(node_id: String) -> void:
 	_camera.focus_on(_node_position(node_id), 1.0)
 	var node := Content.node_by_id(node_id)
 	_node_info.text = "[center]%s[/center]\n%s" % [node.get("name", node_id), node.get("description", "")]
+	_maybe_show_onboarding()
 
 func _on_ui_request(screen_name: String, payload: Dictionary) -> void:
 	match screen_name:
@@ -214,6 +216,22 @@ func _on_quick_settings_pressed() -> void:
 	GameState.save_game()
 	SceneSwitcher.switch_to("res://scenes/screens/settings_screen.tscn")
 
+func _setup_quick_bar_focus() -> void:
+	var bar := $HUD/QuickBar/Margin/VBox
+	var names := ["CampButton", "PartyButton", "JournalButton", "MenuButton"]
+	var nodes: Array = []
+	for n in names:
+		var btn := bar.get_node_or_null(n)
+		if btn:
+			btn.focus_mode = Control.FOCUS_ALL
+			nodes.append(btn)
+	for i in range(nodes.size()):
+		if i > 0:
+			nodes[i].focus_neighbor_top = nodes[i - 1].get_path()
+			nodes[i - 1].focus_neighbor_bottom = nodes[i].get_path()
+	if nodes.size() > 0:
+		nodes[0].grab_focus()
+
 func _on_journal_updated(_entry_id: String) -> void:
 	_journal_pending += 1
 	_refresh_journal_badge()
@@ -268,4 +286,19 @@ func _apply_safe_area() -> void:
 	_ui_adapt.apply_margins($HUD/Panel, left, 0.0, right, bottom)
 	_ui_adapt.apply_margins($HUD/QuickBar, left, top, right, bottom)
 	_ui_adapt.apply_margins($HUD/PauseMenu, left, top, right, bottom)
+
+func _maybe_show_onboarding() -> void:
+	if GameState.settings.get("has_seen_onboarding", false):
+		return
+	if UIAdapt.is_reduced_motion():
+		GameState.settings["has_seen_onboarding"] = true
+		return
+	var coach := preload("res://scripts/world/coach_marks.gd").new()
+	coach.name = "CoachMarks"
+	coach.dismissed.connect(_on_onboarding_dismissed)
+	_hud.add_child(coach)
+
+func _on_onboarding_dismissed() -> void:
+	GameState.settings["has_seen_onboarding"] = true
+	GameState.save_game("auto")
 

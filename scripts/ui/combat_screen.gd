@@ -30,6 +30,7 @@ func _ready() -> void:
 	_update_intent_buttons()
 	_result_label.hide()
 	_continue_button.hide()
+	_continue_button.focus_mode = Control.FOCUS_ALL
 
 func _load_intents() -> void:
 	var library: Dictionary = Content.combat_intents()
@@ -45,6 +46,8 @@ func _load_intents() -> void:
 func _update_intent_buttons() -> void:
 	for c in _intent_grid.get_children():
 		c.free()
+	var first_btn: Button = null
+	var previous: Button = null
 	for intent in _intents:
 		var id: String = intent.get("id", "")
 		var label: String = intent.get("label", id.capitalize())
@@ -54,8 +57,17 @@ func _update_intent_buttons() -> void:
 		btn.custom_minimum_size = Vector2(120, 84)
 		btn.tooltip_text = desc
 		btn.disabled = _is_duel_over()
+		btn.focus_mode = Control.FOCUS_ALL
 		btn.pressed.connect(_on_intent_pressed.bind(id))
 		_intent_grid.add_child(btn)
+		if first_btn == null:
+			first_btn = btn
+		if previous != null:
+			previous.focus_neighbor_right = btn.get_path()
+			btn.focus_neighbor_left = previous.get_path()
+		previous = btn
+	if first_btn and not _is_duel_over():
+		first_btn.grab_focus()
 
 func _is_duel_over() -> bool:
 	return not Simulation.get_duel_winner().is_empty()
@@ -66,6 +78,7 @@ func _on_intent_pressed(intent_id: String) -> void:
 	_selected_intent = intent_id
 	var npc_intent := _pick_npc_intent()
 	var summary: Dictionary = Simulation.duel_round(intent_id, npc_intent)
+	Haptics.play(24)
 	_log_lines.append(summary.get("log", ""))
 	if _log_lines.size() > 6:
 		_log_lines.remove_at(0)
@@ -99,6 +112,7 @@ func _refresh_log() -> void:
 func _show_resolution(winner: String) -> void:
 	_update_intent_buttons()
 	_continue_button.show()
+	_continue_button.grab_focus()
 	if winner == "player":
 		_result_label.text = "Victory. The duel is yours."
 		_result_label.modulate = Color(0.5, 0.85, 0.5)

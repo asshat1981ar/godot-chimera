@@ -15,15 +15,39 @@ func _ready() -> void:
 	_continue_button.modulate.a = 0.5 if _continue_button.disabled else 1.0
 	_no_save_label.visible = not has_save
 	_confirm_popup.hide()
+	_setup_focus()
+
+func _setup_focus() -> void:
+	# Controller / keyboard navigation: start focus on the first actionable button.
+	var first: Button = $VBoxContainer/NewGameButton
+	first.focus_mode = Control.FOCUS_ALL
+	first.grab_focus()
+	for btn in [$VBoxContainer/NewGameButton, $VBoxContainer/ContinueButton,
+			$VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]:
+		btn.focus_mode = Control.FOCUS_ALL
+		btn.focus_neighbor_top = NodePath("..")
+		btn.focus_neighbor_bottom = NodePath("..")
+		btn.focus_neighbor_left = NodePath("..")
+		btn.focus_neighbor_right = NodePath("..")
+	# Confirm popup focus ring.
+	_confirm_cancel.focus_mode = Control.FOCUS_ALL
+	_confirm_ok.focus_mode = Control.FOCUS_ALL
+	_confirm_cancel.focus_neighbor_left = _confirm_ok.get_path()
+	_confirm_ok.focus_neighbor_right = _confirm_cancel.get_path()
+
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_back"):
 		get_viewport().set_input_as_handled()
 		if _confirm_popup.visible:
 			_confirm_popup.hide()
+			_setup_focus()
 		else:
 			GameState.save_game("auto")
 			get_tree().quit()
+	elif event.is_action_pressed("ui_accept") and _confirm_popup.visible:
+		get_viewport().set_input_as_handled()
+		_on_new_game_confirm_pressed()
 
 func _on_new_game_pressed() -> void:
 	if not _has_any_save():
@@ -46,6 +70,7 @@ func _on_quit_pressed() -> void:
 
 func _on_new_game_cancel_pressed() -> void:
 	_confirm_popup.hide()
+	_setup_focus()
 
 func _on_new_game_confirm_pressed() -> void:
 	_confirm_popup.hide()

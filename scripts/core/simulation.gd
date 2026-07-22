@@ -45,6 +45,7 @@ func travel_to(node_id: String) -> void:
 	if node.is_empty():
 		return
 	GameState.mark_node_visited(node_id)
+	Content.advance_quest_progress("visit_node", node_id)
 	var scene_id: String = node.get("sceneId", "")
 	if not scene_id.is_empty():
 		_enter_scene(scene_id)
@@ -240,6 +241,7 @@ func _check_duel_end() -> void:
 		_duel_state.winner = winner
 		_duel_state.phase = DuelPhase.RESOLUTION
 		EventBus.emit_duel_resolved(winner)
+		Content.advance_quest_progress("duel", _duel_state.opponent_id)
 		GameState.current_phase = GameState.Phase.OVERWORLD
 
 func end_duel() -> void:
@@ -252,6 +254,7 @@ func end_duel() -> void:
 
 func end_scene(scene_id: String) -> void:
 	GameState.mark_scene_completed(scene_id)
+	Content.advance_quest_progress("scene", scene_id)
 	advance_simulation_turn()
 	GameState.current_phase = GameState.Phase.OVERWORLD
 	_autosave()
@@ -263,6 +266,8 @@ func _autosave() -> void:
 func rest_at_camp() -> void:
 	GameState.current_phase = GameState.Phase.CAMP
 	advance_simulation_turn()
+	Content.advance_quest_progress("camp", "rest_at_camp")
+	Content.advance_quest_progress("scene", "camp")
 	EventBus.emit_camp_night_started(_calculate_camp_risk())
 	_autosave()
 

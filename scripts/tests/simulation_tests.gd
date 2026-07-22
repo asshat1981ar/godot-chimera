@@ -21,6 +21,7 @@ func _ready() -> void:
 	_test_grant_item_helper()
 	_test_lore_reveal_at_scene()
 	_test_duel_round_trip_payload()
+	_test_tutorial_quest()
 	print("=== Results: %d passed, %d failed ===" % [_passed, _failed])
 	get_tree().quit(_failed)
 
@@ -189,3 +190,34 @@ func _test_duel_round_trip_payload() -> void:
 	var return_payload: Dictionary = SceneSwitcher.pending_payload.get("return_payload", {})
 	_assert(return_screen == "res://scenes/screens/dialogue_screen.tscn", "return_screen stored")
 	_assert(return_payload.get("scene_id", "") == "prologue_scene_1", "return_payload stored scene_id")
+
+func _test_tutorial_quest() -> void:
+	print("Test: tutorial quest mq_first_steps completes through golden path")
+	GameState.new_game()
+	_assert(GameState.is_quest_active("mq_first_steps"), "mq_first_steps starts active")
+
+	# Objective 1: travel to outer_ruins
+	Simulation.travel_to("outer_ruins")
+	_assert(GameState.current_node_id == "outer_ruins", "traveled to outer_ruins")
+	_assert(_objective_progress("mq_first_steps", "mq_first_obj_visit") >= 1, "visit objective advanced")
+
+	# Objective 2: talk to NPC (sceneId merchants_1)
+	# Travel advances the scene, so we mark it completed via Simulation.end_scene.
+	Simulation.end_scene("merchants_1")
+	_assert(_objective_progress("mq_first_steps", "mq_first_obj_talk") >= 1, "talk objective advanced")
+
+	# Objective 3: complete or avoid a duel at watchtower_1
+	Simulation.end_scene("watchtower_1")
+	_assert(_objective_progress("mq_first_steps", "mq_first_obj_duel") >= 1, "duel objective advanced")
+
+	# Objective 4: rest at camp
+	Simulation.rest_at_camp()
+	_assert(_objective_progress("mq_first_steps", "mq_first_obj_camp") >= 1, "camp objective advanced")
+
+	# The quest should now be completed.
+	_assert(GameState.is_quest_completed("mq_first_steps"), "mq_first_steps completed")
+
+func _objective_progress(quest_id: String, objective_id: String) -> int:
+	var state: Dictionary = GameState.quest_states.get(quest_id, {})
+	var objs: Dictionary = state.get("objectives", {})
+	return int(objs.get(objective_id, 0))

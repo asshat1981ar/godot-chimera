@@ -77,6 +77,9 @@ func _advance_quests_on_entry() -> void:
 		var unlock: Dictionary = q.get("unlockConditions", {})
 		if _unlock_conditions_met(unlock):
 			GameState.set_quest_status(quest_id, "active")
+	# Progress visit/scene objectives for the current scene.
+	if not _scene_id.is_empty():
+		Content.advance_quest_progress("scene", _scene_id)
 
 func _unlock_conditions_met(unlock: Dictionary) -> bool:
 	var min_disp: Dictionary = unlock.get("minDisposition", {})
@@ -103,11 +106,22 @@ func _on_node_presented(node: Dictionary) -> void:
 func _present_tree_choices() -> void:
 	_clear_choices()
 	var options: Array = _engine.visible_choices()
+	var first_btn: Button = null
+	var previous: Button = null
 	for i in range(options.size()):
 		var opt: Dictionary = options[i]
 		var btn := _create_choice_button(opt.get("text", "..."))
+		btn.focus_mode = Control.FOCUS_ALL
 		btn.pressed.connect(_on_tree_choice.bind(i))
 		_choices.add_child(btn)
+		if first_btn == null:
+			first_btn = btn
+		if previous != null:
+			previous.focus_neighbor_bottom = btn.get_path()
+			btn.focus_neighbor_top = previous.get_path()
+		previous = btn
+	if first_btn:
+		first_btn.grab_focus()
 
 func _on_tree_choice(choice_index: int) -> void:
 	_stop_typewriter()
@@ -144,13 +158,28 @@ func _present_legacy_choices() -> void:
 		{"label": "Empathize", "type": "empathize"},
 		{"label": "Lie", "type": "lie"},
 	]
+	var first_btn: Button = null
+	var previous: Button = null
 	for opt in options:
 		var btn := _create_choice_button(opt.label)
+		btn.focus_mode = Control.FOCUS_ALL
 		btn.pressed.connect(_on_legacy_choice.bind(opt.type))
 		_choices.add_child(btn)
+		if first_btn == null:
+			first_btn = btn
+		if previous != null:
+			previous.focus_neighbor_bottom = btn.get_path()
+			btn.focus_neighbor_top = previous.get_path()
+		previous = btn
 	var leave := _create_choice_button("Leave")
+	leave.focus_mode = Control.FOCUS_ALL
 	leave.pressed.connect(_on_leave)
 	_choices.add_child(leave)
+	if previous != null:
+		previous.focus_neighbor_bottom = leave.get_path()
+		leave.focus_neighbor_top = previous.get_path()
+	if first_btn:
+		first_btn.grab_focus()
 
 func _on_legacy_choice(choice_type: String) -> void:
 	_stop_typewriter()

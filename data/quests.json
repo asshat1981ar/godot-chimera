@@ -19,6 +19,30 @@
     }
   },
   {
+    "id": "mq_first_steps",
+    "name": "First Steps in Ash",
+    "act": 1,
+    "type": "main",
+    "giverNpcId": "warden",
+    "summary": "Learn the road: travel to a node, speak with someone, survive a trial of wills, and rest before the ash deepens.",
+    "unlockConditions": {},
+    "objectives": [
+      { "id": "mq_first_obj_visit", "description": "Travel to the Outer Ruins", "type": "visit_node", "targetId": "outer_ruins", "count": 1 },
+      { "id": "mq_first_obj_talk", "description": "Speak with a merchant in the hollow", "type": "scene", "targetId": "merchants_1", "count": 1 },
+      { "id": "mq_first_obj_duel", "description": "Complete or avoid a duel at the watchtower", "type": "scene", "targetId": "watchtower_1", "count": 1 },
+      { "id": "mq_first_obj_camp", "description": "Rest at camp", "type": "camp", "targetId": "rest_at_camp", "count": 1 }
+    ],
+    "rewards": {
+      "disposition": { "warden": 0.05, "elena": 0.05 },
+      "items": [ { "itemId": "memory_dust", "quantity": 2 } ],
+      "reveals": ["hollow_history"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
     "id": "mq_ashes_of_the_hollow",
     "name": "Ashes of the Hollow",
     "act": 1,

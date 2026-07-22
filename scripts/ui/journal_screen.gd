@@ -10,6 +10,17 @@ func _ready() -> void:
 	_refresh()
 	EventBus.state_changed.connect(_on_state_changed)
 	EventBus.journal_updated.connect(_on_journal_updated)
+	_setup_focus()
+
+func _setup_focus() -> void:
+	var back_btn: Button = $VBox/BackButton
+	back_btn.focus_mode = Control.FOCUS_ALL
+	back_btn.grab_focus()
+	var tabs: TabContainer = $VBox/Tabs
+	if tabs:
+		tabs.focus_mode = Control.FOCUS_ALL
+		back_btn.focus_neighbor_top = tabs.get_path()
+		tabs.focus_neighbor_bottom = back_btn.get_path()
 
 func _on_state_changed(key: String, _value: Variant) -> void:
 	if key in ["quest_states", "unlocked_lore", "completed_scenes"]:

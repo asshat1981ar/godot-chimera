@@ -48,6 +48,7 @@ func select() -> void:
 	if not GameState.is_node_unlocked(node_id):
 		EventBus.emit_ui_request("node_locked", {"node_id": node_id})
 		return
+	Haptics.play(16)
 	var node := Content.node_by_id(node_id)
 	var scene := Content.scene_by_id(node.get("sceneId", ""))
 	var npc_id: String = scene.get("npcId", "") if not scene.is_empty() else ""

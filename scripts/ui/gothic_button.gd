@@ -17,6 +17,7 @@ func _ready() -> void:
 
 func _on_focus() -> void:
 	modulate = Color(1.1, 1.05, 1.0, 1)
+	# Godot's built-in focus style handles the visible border; modulate gives a warm glow.
 
 func _on_unfocus() -> void:
 	modulate = Color.WHITE
@@ -24,6 +25,7 @@ func _on_unfocus() -> void:
 func _on_pressed() -> void:
 	if play_click_sound and AudioManager:
 		AudioManager.play_ui_click()
+	Haptics.play(12)
 
 func _on_down() -> void:
 	if UIAdapt.is_reduced_motion():

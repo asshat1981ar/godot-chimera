@@ -1,0 +1,92 @@
+name: Chimera Godot CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  GODOT_VERSION: "4.2.2"
+  ANDROID_SDK_BUILD_TOOLS: /usr/local/lib/android/sdk/build-tools/34.0.0
+  ANDROID_SDK_PLATFORM_TOOLS: /usr/local/lib/android/sdk/platform-tools
+
+jobs:
+  validate-and-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          mkdir -p ~/.local/share/godot
+          curl -fsSL -o /tmp/godot.zip \
+            "https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/.local/share/godot
+          sudo ln -s ~/.local/share/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+          godot --version
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+
+      - name: Static GDScript check
+        run: python3 scripts/tests/validate_gdscript.py
+
+      - name: Validate JSON data
+        run: |
+          for f in $(find data -name '*.json'); do
+            python3 -m json.tool "$f" > /dev/null
+            echo "OK $f"
+          done
+
+      - name: Headless project import
+        run: timeout 120 godot --headless --path . --quit
+
+      - name: Headless simulation tests
+        run: godot --headless --path . res://scenes/tests/simulation_tests.tscn
+
+      - name: Export Android APK
+        env:
+          GODOT_ANDROID_KEYSTORE: ${{ secrets.GODOT_ANDROID_KEYSTORE }}
+          GODOT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.GODOT_ANDROID_KEYSTORE_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.GODOT_ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          # Use repository debug keystore if release secrets are not configured.
+          KS="${PWD}/.tools/keystore/chimera-debug.keystore"
+          if [ ! -f "$KS" ]; then
+            mkdir -p "$(dirname "$KS")"
+            keytool -genkey -v -keystore "$KS" -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass android -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          # Override export preset keystore paths if secrets are provided.
+          if [ -n "$GODOT_ANDROID_KEYSTORE" ]; then
+            printf '%s' "$GODOT_ANDROID_KEYSTORE" | base64 -d > /tmp/chimera-release.keystore
+            python3 - <<'PY'
+          import os, re
+          cfg = open('export_presets.cfg').read()
+          cfg = re.sub(r'keystore/release="[^"]*"', 'keystore/release="/tmp/chimera-release.keystore"', cfg)
+          cfg = re.sub(r'keystore/release_user="[^"]*"', 'keystore/release_user="' + os.environ['GODOT_ANDROID_KEYSTORE_ALIAS'] + '"', cfg)
+          cfg = re.sub(r'keystore/release_password="[^"]*"', 'keystore/release_password="' + os.environ['GODOT_ANDROID_KEYSTORE_PASSWORD'] + '"', cfg)
+          open('export_presets.cfg', 'w').write(cfg)
+          PY
+          fi
+          # CI runs godot directly; export_apk.sh uses run.sh which expects a local wrapper.
+          godot --headless --export-debug Android /tmp/chimera-debug.apk --path .
+
+      - name: Verify APK
+        run: |
+          export PATH="${ANDROID_SDK_BUILD_TOOLS}:${ANDROID_SDK_PLATFORM_TOOLS}:$PATH"
+          aapt dump badging /tmp/chimera-debug.apk | head -n 1
+          apksigner verify --verbose /tmp/chimera-debug.apk | head -n 6
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chimera-android-apk
+          path: /tmp/chimera-debug.apk
+          if-no-files-found: error

@@ -200,3 +200,46 @@ func item(id: String) -> Dictionary:
 		if it.get("id", "") == id:
 			return it
 	return {}
+
+## Quest progression helpers ----------------------------------------------------
+
+func advance_quest_progress(type: String, target_id: String, amount: int = 1) -> void:
+	## Central, data-driven quest objective advancement. Call from Simulation/UI
+	## hooks whenever an objective-worthy event occurs (travel, scene end, item
+	## grant, reveal, duel, choice, camp rest).
+	var quests: Array = quests()
+	for q in quests:
+		var quest_id: String = q.get("id", "")
+		var state: Dictionary = GameState.quest_states.get(quest_id, {})
+		if state.is_empty() or state.get("status", "") != "active":
+			continue
+		var objectives: Array = q.get("objectives", [])
+		for obj in objectives:
+			if obj.get("type", "") != type:
+				continue
+			if obj.get("targetId", "") != target_id:
+				continue
+			var obj_id: String = obj.get("id", "")
+			if obj_id.is_empty():
+				continue
+			var obj_state: Dictionary = state.get("objectives", {})
+			var current: int = int(obj_state.get(obj_id, 0))
+			var target_count: int = int(obj.get("count", 1))
+			if current < target_count:
+				obj_state[obj_id] = mini(current + amount, target_count)
+				state["objectives"] = obj_state
+				GameState.quest_states[quest_id] = state
+				EventBus.emit_quest_objective_updated(obj_id, "advanced")
+				EventBus.emit_state_changed("quest_states", GameState.quest_states.duplicate(true))
+				_check_quest_completion(quest_id, q, state)
+
+func _check_quest_completion(quest_id: String, quest: Dictionary, state: Dictionary) -> void:
+	var objectives: Array = quest.get("objectives", [])
+	if objectives.is_empty():
+		return
+	var obj_state: Dictionary = state.get("objectives", {})
+	for obj in objectives:
+		var progress: int = int(obj_state.get(obj.get("id", ""), 0))
+		if progress < int(obj.get("count", 1)):
+			return
+	GameState.set_quest_status(quest_id, "completed")
