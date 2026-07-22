@@ -14,6 +14,9 @@ func _ready() -> void:
 	_continue.pressed.connect(_on_continue)
 
 func _act_summary(act: int) -> String:
+	var entry := Content.act_entry(act)
+	if not entry.is_empty():
+		return entry.get("summary", "The story turns.")
 	match act:
 		1:
 			return "The Hollow Gate opens. A voice beneath the ash remembers your name before you speak it."

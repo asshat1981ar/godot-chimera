@@ -75,6 +75,8 @@
     "connectedTo": ["deep_hollow"],
     "xFraction": 0.35,
     "yFraction": 0.05,
+    "actGate": true,
+    "actGateTarget": 2,
     "unlockRequirements": {
       "completedScenes": ["deep_hollow_1"]
     }

@@ -20,6 +20,9 @@ func _ready() -> void:
 	if _opponent_id.is_empty():
 		_opponent_id = SceneSwitcher.pending_payload.get("opponent_id", "warden")
 		Simulation.start_duel(_opponent_id)
+	var return_payload: Dictionary = SceneSwitcher.pending_payload.get("return_payload", {})
+	if not return_payload.is_empty():
+		SceneSwitcher.pending_payload = SceneSwitcher.pending_payload.duplicate()
 	var npc := Content.npc_by_id(_opponent_id)
 	_opponent_name.text = npc.get("name", _opponent_id)
 	_load_intents()
@@ -106,4 +109,9 @@ func _show_resolution(winner: String) -> void:
 
 func _on_continue_pressed() -> void:
 	GameState.save_game()
-	SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")
+	var return_screen: String = SceneSwitcher.pending_payload.get("return_screen", "")
+	var return_payload: Dictionary = SceneSwitcher.pending_payload.get("return_payload", {})
+	if not return_screen.is_empty():
+		SceneSwitcher.switch_to(return_screen, return_payload)
+	else:
+		SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")

@@ -13,16 +13,18 @@ const BUTTON_MIN_SIZE := 84.0
 @onready var _camera: Camera2D = $Camera2D
 @onready var _hud: CanvasLayer = $HUD
 @onready var _node_info: RichTextLabel = $HUD/Panel/Margin/VBox/NodeInfoLabel
-@onready var _act_label: Label = $HUD/TopBar/ActLabel
+@onready var _act_label: Label = $HUD/TopBar/VBox/ActLabel
+@onready var _objective_label: Label = $HUD/TopBar/VBox/ObjectiveLabel
 @onready var _pause_menu: Control = $HUD/PauseMenu
 @onready var _quick_bar: Control = $HUD/QuickBar
+@onready var _camp_badge: Label = $HUD/QuickBar/Margin/VBox/CampButton/CampBadge
 @onready var _journal_badge: Label = $HUD/QuickBar/Margin/VBox/JournalButton/JournalBadge
 
 var _node_token_scene := preload("res://scenes/world/map_node_token.tscn")
 var _npc_token_scene := preload("res://scenes/world/npc_token.tscn")
-var _connections: Line2D
-var _ui_adapt := UIAdapt.new()
+var _ui_adapt: UIAdapt = UIAdapt.new()
 var _journal_pending := 0
+var _camp_pending := 0
 
 func _ready() -> void:
 	GameState.current_phase = GameState.Phase.OVERWORLD
@@ -33,11 +35,15 @@ func _ready() -> void:
 	EventBus.ui_request.connect(_on_ui_request)
 	EventBus.node_visited.connect(_on_node_visited)
 	EventBus.journal_updated.connect(_on_journal_updated)
+	EventBus.state_changed.connect(_on_state_changed)
+	EventBus.camp_night_started.connect(_on_camp_night_started)
 	_act_label.text = "Act %d" % GameState.current_act
+	_refresh_objective_label()
 	add_child(_ui_adapt)
 	_apply_safe_area()
 	get_tree().root.size_changed.connect(_apply_safe_area)
 	_refresh_journal_badge()
+	_refresh_camp_badge()
 	_pause_menu.hide()
 
 func _build_map() -> void:
@@ -53,12 +59,7 @@ func _build_map() -> void:
 			sprite.texture = _pick_terrain_tile(rng)
 			sprite.modulate = Color(0.55, 0.50, 0.44, 1)
 			_world.add_child(sprite)
-	# Draw connections behind nodes.
-	_connections = Line2D.new()
-	_connections.default_color = Color(0.45, 0.38, 0.30, 0.55)
-	_connections.width = 3.0
-	_connections.z_index = 5
-	_world.add_child(_connections)
+	# Connections are drawn as per-edge Line2D instances in _draw_connections().
 
 func _pick_terrain_tile(rng: RandomNumberGenerator) -> Texture2D:
 	var r := rng.randf()
@@ -105,6 +106,7 @@ func _node_state(id: String) -> String:
 	return "neutral"
 
 func _draw_connections(nodes: Array) -> void:
+	# Each edge gets its own Line2D so unrelated edges are never joined.
 	for node in nodes:
 		var from := _node_position(node.id)
 		for target_id in node.get("connectedTo", []):
@@ -112,8 +114,13 @@ func _draw_connections(nodes: Array) -> void:
 			if target.is_empty():
 				continue
 			var to := _node_position(target_id)
-			_connections.add_point(from)
-			_connections.add_point(to)
+			var line := Line2D.new()
+			line.default_color = Color(0.45, 0.38, 0.30, 0.55)
+			line.width = 3.0
+			line.z_index = 5
+			line.add_point(from)
+			line.add_point(to)
+			_world.add_child(line)
 
 func _place_npcs() -> void:
 	for npc in Content.npcs():
@@ -211,9 +218,41 @@ func _on_journal_updated(_entry_id: String) -> void:
 	_journal_pending += 1
 	_refresh_journal_badge()
 
+func _on_state_changed(key: String, _value: Variant) -> void:
+	match key:
+		"quest_states":
+			_refresh_objective_label()
+			_journal_pending += 1
+			_refresh_journal_badge()
+		"unlocked_lore":
+			_journal_pending += 1
+			_refresh_journal_badge()
+		"completed_scenes":
+			_refresh_objective_label()
+
+func _on_camp_night_started(_risk: float) -> void:
+	_camp_pending += 1
+	_refresh_camp_badge()
+
 func _refresh_journal_badge() -> void:
 	_journal_badge.text = str(_journal_pending)
 	_journal_badge.visible = _journal_pending > 0
+
+func _refresh_camp_badge() -> void:
+	_camp_badge.text = str(_camp_pending)
+	_camp_badge.visible = _camp_pending > 0
+
+func _refresh_objective_label() -> void:
+	var title := _active_quest_title()
+	_objective_label.text = "Objective: %s" % title if not title.is_empty() else "Objective: —"
+
+func _active_quest_title() -> String:
+	for q in Content.quests():
+		var quest_id: String = q.get("id", "")
+		var state: Dictionary = GameState.quest_states.get(quest_id, {})
+		if state.get("status", "") == "active":
+			return q.get("name", quest_id)
+	return ""
 
 func _apply_safe_area() -> void:
 	var viewport_size := get_viewport_rect().size

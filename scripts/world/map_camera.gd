@@ -64,15 +64,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventScreenDrag and _touch_active and event.index == _touch_index:
-		var screen_delta := event.position - _touch_start_screen
-		var world_delta := screen_delta / zoom
+		var screen_delta: Vector2 = event.position - _touch_start_screen
+		var world_delta: Vector2 = screen_delta / zoom
 		_target_position = _touch_start_world - world_delta
 		return
 
 	# Pinch zoom around the gesture focal point.
 	if event is InputEventMagnifyGesture:
-		var focal_world := get_canvas_transform().affine_inverse() * event.position
-		var factor := (event.factor - 1.0) * zoom_step * 4.0
+		var focal_world: Vector2 = get_canvas_transform().affine_inverse() * event.position
+		var factor: float = (event.factor - 1.0) * zoom_step * 4.0
 		_zoom_at(focal_world, factor)
 		return
 

@@ -26,6 +26,7 @@ var _session_vows: Array[String] = []
 signal node_presented(node: Dictionary)
 signal duel_requested(opponent_id: String)
 signal scene_ended(scene_id: String)
+signal act_gate_triggered(scene_id: String, next_act: int)
 
 func start(tree: Dictionary) -> void:
 	reset()
@@ -96,6 +97,7 @@ func choose(choice_index: int) -> Dictionary:
 		current_node = {}
 		current_node_id = ""
 		scene_ended.emit(scene_id)
+		_emit_act_gate_if_needed()
 		return result
 
 	if effects.get("startDuel", false):
@@ -111,6 +113,7 @@ func choose(choice_index: int) -> Dictionary:
 		current_node = {}
 		current_node_id = ""
 		scene_ended.emit(scene_id)
+		_emit_act_gate_if_needed()
 		return result
 
 	current_node_id = str(next_node_id)
@@ -124,6 +127,13 @@ func visible_choices() -> Array:
 		if _conditions_met(choice.get("conditions", {})):
 			out.append(choice)
 	return out
+
+func _emit_act_gate_if_needed() -> void:
+	var node := Content.node_by_id(scene_id)
+	if node.is_empty():
+		node = Content.node_by_id(tree_id)
+	if not node.is_empty() and node.get("actGate", false):
+		act_gate_triggered.emit(scene_id, int(node.get("actGateTarget", 0)))
 
 func _present_current() -> void:
 	var tree: Dictionary = Content.dialogue_tree(tree_id)

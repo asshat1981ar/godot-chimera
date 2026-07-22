@@ -61,6 +61,21 @@ custom_minimum_size = Vector2(0, 140)
 text = "The fire burns low..."
 bbcode_enabled = true
 
+[node name="SummaryPanel" type="PanelContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="VBox/SummaryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="SummaryVBox" type="VBoxContainer" parent="VBox/SummaryPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
 [node name="ContinueButton" type="Button" parent="VBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 84)

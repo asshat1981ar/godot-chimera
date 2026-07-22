@@ -98,6 +98,8 @@
     ],
     "xFraction": 0.5,
     "yFraction": 0.05,
+    "actGate": true,
+    "actGateTarget": 3,
     "unlockRequirements": {
       "completedScenes": [
         "reforged_camp",

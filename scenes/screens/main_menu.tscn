@@ -61,6 +61,12 @@ custom_minimum_size = Vector2(0, 84)
 text = "Continue"
 script = ExtResource("2_gbtn")
 
+[node name="NoSaveLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "No save found — start your journey"
+modulate = Color(0.6, 0.6, 0.6, 1)
+
 [node name="SettingsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 84)

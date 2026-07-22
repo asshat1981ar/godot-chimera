@@ -106,6 +106,14 @@ func node_unlock_requirements(id: String) -> Dictionary:
 	var node := node_by_id(id)
 	return node.get("unlockRequirements", {})
 
+func is_act_gate(id: String) -> bool:
+	var node := node_by_id(id)
+	return bool(node.get("actGate", false))
+
+func act_gate_target(id: String) -> int:
+	var node := node_by_id(id)
+	return int(node.get("actGateTarget", 0))
+
 func all_nodes() -> Array:
 	var out: Array = []
 	for act in _maps:
@@ -134,6 +142,19 @@ func quests() -> Array:
 func quest(id: String) -> Dictionary:
 	for q in _quests:
 		if q.get("id", "") == id:
+			return q
+	return {}
+
+func act_entry(act: int) -> Dictionary:
+	for q in _quests:
+		if q.get("id", "").begins_with("act_%d_" % act):
+			return q
+	return {}
+
+func ending_quest() -> Dictionary:
+	for q in _quests:
+		var rewards: Dictionary = q.get("rewards", {})
+		if rewards.get("endings", []):
 			return q
 	return {}
 

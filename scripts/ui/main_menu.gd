@@ -1,6 +1,7 @@
 extends Control
 
 @onready var _continue_button: Button = $VBoxContainer/ContinueButton
+@onready var _no_save_label: Label = $VBoxContainer/NoSaveLabel
 @onready var _confirm_popup: Control = $NewGameConfirm
 @onready var _confirm_summary: RichTextLabel = $NewGameConfirm/Panel/Margin/VBox/SummaryLabel
 @onready var _confirm_cancel: Button = $NewGameConfirm/Panel/Margin/VBox/ButtonRow/CancelButton
@@ -12,6 +13,7 @@ func _ready() -> void:
 	var has_save := FileAccess.file_exists(GameState.SAVE_PATH) or GameState.list_save_slots().size() > 0
 	_continue_button.disabled = not has_save
 	_continue_button.modulate.a = 0.5 if _continue_button.disabled else 1.0
+	_no_save_label.visible = not has_save
 	_confirm_popup.hide()
 
 func _input(event: InputEvent) -> void:

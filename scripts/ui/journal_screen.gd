@@ -46,12 +46,12 @@ func _refresh_quests() -> void:
 			var obj_text := "  • %s (%d/%d)" % [desc, progress, target]
 			_quest_entries.add_child(_make_label(obj_text, 16))
 	if not any:
-		_quest_entries.add_child(_make_empty("No quests yet. The ash has not asked anything of you."))
+		_quest_entries.add_child(_make_placeholder("Nothing here yet.\nThe ash has not asked anything of you."))
 
 func _refresh_lore() -> void:
 	for c in _lore_entries.get_children(): c.free()
 	if GameState.unlocked_lore.is_empty():
-		_lore_entries.add_child(_make_empty("No lore unlocked. Walk further; the hollow will give you words to keep."))
+		_lore_entries.add_child(_make_placeholder("Nothing here yet.\nWalk further; the hollow will give you words to keep."))
 		return
 	for entry_id in GameState.unlocked_lore:
 		var entry := Content.lore_entry(entry_id)
@@ -70,14 +70,14 @@ func _refresh_scenes() -> void:
 	for c in _scene_entries.get_children(): c.free()
 	var completed := GameState.completed_scenes
 	if completed.is_empty():
-		_scene_entries.add_child(_make_empty("No scenes completed. The story has not yet turned."))
+		_scene_entries.add_child(_make_placeholder("Nothing here yet.\nThe story has not yet turned."))
 	else:
 		var lbl := _make_label("Completed scenes:")
 		_scene_entries.add_child(lbl)
 		for scene_id in completed:
 			_scene_entries.add_child(_make_label("  • %s" % scene_id, 16))
 	if GameState.journal_entries.is_empty():
-		_scene_entries.add_child(_make_empty("No journal entries yet."))
+		_scene_entries.add_child(_make_placeholder("Nothing here yet.\nNo records yet."))
 	else:
 		_scene_entries.add_child(_make_label("Records:"))
 		for entry in GameState.journal_entries:
@@ -91,8 +91,12 @@ func _make_label(text: String, font_size: int = 18) -> Label:
 	return lbl
 
 func _make_empty(text: String) -> Label:
+	return _make_placeholder(text)
+
+func _make_placeholder(text: String) -> Label:
 	var lbl := _make_label(text, 16)
 	lbl.modulate = Color(0.6, 0.6, 0.6)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return lbl
 
 func _on_back_pressed() -> void:

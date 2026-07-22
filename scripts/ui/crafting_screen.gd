@@ -24,6 +24,9 @@ func _refresh_recipes() -> void:
 	_recipes = Content.recipes()
 	if _recipes.is_empty():
 		_recipes = _fallback_recipes()
+	if _recipes.is_empty():
+		_recipe_list.add_child(_make_placeholder("Nothing here yet.\nNo recipes are known to the ash."))
+		return
 	for i in _recipes.size():
 		var recipe: Dictionary = _recipes[i]
 		var btn := Button.new()
@@ -118,7 +121,7 @@ func _refresh_inventory() -> void:
 		c.free()
 	var items := Content.items()
 	if items.is_empty():
-		_inventory_list.add_child(_make_label("No item catalog loaded."))
+		_inventory_list.add_child(_make_placeholder("Nothing here yet.\nNo item catalog loaded."))
 		return
 	var any := false
 	for item in items:
@@ -129,12 +132,18 @@ func _refresh_inventory() -> void:
 		any = true
 		_inventory_list.add_child(_make_label("%s x%d" % [item.get("name", id), qty]))
 	if not any:
-		_inventory_list.add_child(_make_label("Inventory empty."))
+		_inventory_list.add_child(_make_placeholder("Nothing here yet.\nYour pack is empty."))
 
 func _make_label(text: String) -> Label:
 	var lbl := Label.new()
 	lbl.text = text
 	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return lbl
+
+func _make_placeholder(text: String) -> Label:
+	var lbl := _make_label(text)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.modulate = Color(0.6, 0.6, 0.6)
 	return lbl
 
 func _on_back_pressed() -> void:

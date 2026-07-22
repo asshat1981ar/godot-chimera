@@ -1,5 +1,24 @@
 [
   {
+    "id": "act_1_intro",
+    "name": "Act I — The Hollow Gate",
+    "act": 1,
+    "type": "act",
+    "giverNpcId": "",
+    "summary": "The Hollow Gate opens. A voice beneath the ash remembers your name before you speak it.",
+    "unlockConditions": {},
+    "objectives": [],
+    "rewards": {
+      "disposition": {},
+      "items": [],
+      "reveals": [],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
     "id": "mq_ashes_of_the_hollow",
     "name": "Ashes of the Hollow",
     "act": 1,
@@ -17,6 +36,25 @@
       "disposition": { "warden": 0.1, "hollow_king": 0.1 },
       "items": [],
       "reveals": ["king_history"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "act_2_intro",
+    "name": "Act II — The Ashen Reach",
+    "act": 2,
+    "type": "act",
+    "giverNpcId": "",
+    "summary": "The Ashen Reach. Crowns are offered, crowns are broken, and every ally is a question.",
+    "unlockConditions": {},
+    "objectives": [],
+    "rewards": {
+      "disposition": {},
+      "items": [],
+      "reveals": [],
       "unlockScenes": [],
       "recipes": [],
       "recruit": [],
@@ -43,6 +81,25 @@
       "disposition": { "seren": 0.1, "kael": 0.1 },
       "items": [ { "itemId": "king_shard", "quantity": 1 } ],
       "reveals": ["crown_nature"],
+      "unlockScenes": [],
+      "recipes": [],
+      "recruit": [],
+      "endings": []
+    }
+  },
+  {
+    "id": "act_3_intro",
+    "name": "Act III — The Hollow Tide",
+    "act": 3,
+    "type": "act",
+    "giverNpcId": "",
+    "summary": "The Hollow Tide. What the sea was given, the sea now asks back.",
+    "unlockConditions": {},
+    "objectives": [],
+    "rewards": {
+      "disposition": {},
+      "items": [],
+      "reveals": [],
       "unlockScenes": [],
       "recipes": [],
       "recruit": [],

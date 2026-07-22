@@ -110,6 +110,8 @@
     ],
     "xFraction": 0.5,
     "yFraction": 0.02,
+    "actGate": true,
+    "actGateTarget": 4,
     "unlockRequirements": {
       "completedScenes": [
         "dara_ritual",

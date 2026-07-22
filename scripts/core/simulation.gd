@@ -54,6 +54,7 @@ func travel_to(node_id: String) -> void:
 func _enter_scene(scene_id: String) -> void:
 	GameState.current_phase = GameState.Phase.SCENE
 	EventBus.emit_scene_entered(scene_id)
+	reveal_lore_at_scene(scene_id)
 	var scene := Content.scene_by_id(scene_id)
 	if scene.is_empty():
 		return
@@ -61,6 +62,18 @@ func _enter_scene(scene_id: String) -> void:
 	var topic: String = scene.get("topic", "")
 	if not npc_id.is_empty():
 		EventBus.emit_dialogue_started(npc_id, topic)
+
+func grant_item(item_id: String, amount: int = 1) -> void:
+	## Canonical helper for giving the player items. Centralizes the inventory event.
+	GameState.add_inventory(item_id, amount)
+
+func reveal_lore_at_scene(scene_id: String) -> void:
+	## Unlock lore entries authored to be revealed on scene entry.
+	## Lore unlocked through dialogue choices is handled by DialogueEngine.
+	for entry in Content.lore_entries_by_scene(scene_id):
+		var entry_id: String = entry.get("id", "")
+		if not entry_id.is_empty():
+			GameState.unlock_lore(entry_id)
 
 func apply_dialogue_choice(npc_id: String, choice_type: String) -> void:
 	## Choice_type maps to disposition deltas authored per archetype.
@@ -228,6 +241,14 @@ func _check_duel_end() -> void:
 		_duel_state.phase = DuelPhase.RESOLUTION
 		EventBus.emit_duel_resolved(winner)
 		GameState.current_phase = GameState.Phase.OVERWORLD
+
+func end_duel() -> void:
+	## Cleanly close the active duel state so the scene/round-trip can continue.
+	if _duel_state.is_empty():
+		return
+	_duel_state = {}
+	if GameState.current_phase == GameState.Phase.DUEL:
+		GameState.current_phase = GameState.Phase.SCENE
 
 func end_scene(scene_id: String) -> void:
 	GameState.mark_scene_completed(scene_id)

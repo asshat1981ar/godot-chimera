@@ -29,12 +29,26 @@ anchor_right = 1.0
 offset_bottom = 56.0
 grow_horizontal = 2
 
-[node name="ActLabel" type="Label" parent="HUD/TopBar"]
+[node name="VBox" type="VBoxContainer" parent="HUD/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+
+[node name="ActLabel" type="Label" parent="HUD/TopBar/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "Act 1"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ObjectiveLabel" type="Label" parent="HUD/TopBar/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Objective: —"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="Panel" type="PanelContainer" parent="HUD"]
 custom_minimum_size = Vector2(320, 180)
@@ -99,6 +113,21 @@ custom_minimum_size = Vector2(0, 84)
 size_flags_vertical = 3
 text = "Camp"
 script = ExtResource("3_gbtn")
+
+[node name="CampBadge" type="Label" parent="HUD/QuickBar/Margin/VBox/CampButton"]
+layout_mode = 2
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -26.0
+offset_top = -10.0
+offset_right = 2.0
+offset_bottom = 18.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PartyButton" type="Button" parent="HUD/QuickBar/Margin/VBox"]
 layout_mode = 2

@@ -18,6 +18,9 @@ func _ready() -> void:
 	_test_seeded_determinism()
 	_test_delayed_disposition_turn_counter()
 	_test_data_integrity()
+	_test_grant_item_helper()
+	_test_lore_reveal_at_scene()
+	_test_duel_round_trip_payload()
 	print("=== Results: %d passed, %d failed ===" % [_passed, _failed])
 	get_tree().quit(_failed)
 
@@ -154,3 +157,35 @@ func _test_data_integrity() -> void:
 			var ing_id: String = ingredient.get("itemId", "")
 			_assert(item_ids.has(ing_id), "recipe ingredient '%s' exists in items" % ing_id)
 	_assert(recipe_count > 0, "at least one recipe loaded")
+
+func _test_grant_item_helper() -> void:
+	print("Test: Simulation.grant_item helper")
+	GameState.new_game()
+	Simulation.grant_item("memory_dust", 2)
+	_assert(int(GameState.inventory.get("memory_dust", 0)) == 2, "grant_item adds correct amount")
+	Simulation.grant_item("memory_dust", 1)
+	_assert(int(GameState.inventory.get("memory_dust", 0)) == 3, "grant_item stacks")
+
+func _test_lore_reveal_at_scene() -> void:
+	print("Test: lore reveal at scene entry")
+	GameState.new_game()
+	var scene_id := "prologue_scene_1"
+	var expected_entry := "lore_the_dug_city"
+	if GameState.unlocked_lore.has(expected_entry):
+		GameState.unlocked_lore.erase(expected_entry)
+	Simulation.reveal_lore_at_scene(scene_id)
+	_assert(GameState.unlocked_lore.has(expected_entry), "scene entry unlocks lore_the_dug_city")
+
+func _test_duel_round_trip_payload() -> void:
+	print("Test: dialogue combat return payload")
+	GameState.new_game()
+	var payload: Dictionary = {
+		"opponent_id": "warden",
+		"return_screen": "res://scenes/screens/dialogue_screen.tscn",
+		"return_payload": {"npc_id": "warden", "scene_id": "prologue_scene_1"},
+	}
+	SceneSwitcher.pending_payload = payload
+	var return_screen: String = SceneSwitcher.pending_payload.get("return_screen", "")
+	var return_payload: Dictionary = SceneSwitcher.pending_payload.get("return_payload", {})
+	_assert(return_screen == "res://scenes/screens/dialogue_screen.tscn", "return_screen stored")
+	_assert(return_payload.get("scene_id", "") == "prologue_scene_1", "return_payload stored scene_id")

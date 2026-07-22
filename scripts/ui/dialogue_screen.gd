@@ -60,6 +60,7 @@ func _attempt_tree_start() -> void:
 		_engine.node_presented.connect(_on_node_presented)
 		_engine.scene_ended.connect(_on_scene_ended)
 		_engine.duel_requested.connect(_on_duel_requested)
+		_engine.act_gate_triggered.connect(_on_act_gate_triggered)
 		_engine.start(tree)
 		_advance_quests_on_entry()
 	else:
@@ -171,9 +172,32 @@ func _on_scene_ended(_scene: String) -> void:
 	Simulation.end_scene(_scene_id)
 	SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")
 
+func _on_act_gate_triggered(_scene_id: String, next_act: int) -> void:
+	# NAR wires the trigger; the act_transition screen is SYS-owned, so we emit a UI request.
+	Simulation.advance_act(next_act)
+	EventBus.emit_ui_request("res://scenes/screens/act_transition.tscn", {"next_act": next_act})
+
 func _on_duel_requested(opponent_id: String) -> void:
 	Simulation.start_duel(opponent_id)
-	SceneSwitcher.switch_to("res://scenes/screens/combat_screen.tscn")
+	SceneSwitcher.switch_to("res://scenes/screens/combat_screen.tscn", {
+		"opponent_id": opponent_id,
+		"return_screen": "res://scenes/screens/dialogue_screen.tscn",
+		"return_payload": {
+			"npc_id": _npc_id,
+			"scene_id": _scene_id,
+		},
+	})
+
+## Public method called by combat_screen.gd after a duel resolves.
+## Payload set here carries the dialogue state so combat_screen can resume.
+func resume_dialogue_after_duel() -> void:
+	Simulation.end_duel()
+	if _engine == null or _engine.current_node.is_empty():
+		Simulation.end_scene(_scene_id)
+		SceneSwitcher.switch_to("res://scenes/screens/overhead_map.tscn")
+	else:
+		_setup_portrait()
+		_on_node_presented(_engine.current_node)
 
 # --- Shared UI helpers --------------------------------------------------------
 
@@ -192,9 +216,15 @@ func _create_choice_button(label: String) -> Button:
 func _start_typewriter(full_text: String) -> void:
 	_stop_typewriter()
 	_typewriter_target = full_text
+	_typewriter_skip_requested = false
+	# Reduced motion: reveal the full text immediately without animation.
+	if UIAdapt.is_reduced_motion():
+		_text_box.text = full_text
+		_typewriter_visible = full_text.length()
+		_typewriter_active = false
+		return
 	_typewriter_visible = 0
 	_typewriter_active = true
-	_typewriter_skip_requested = false
 	_update_typewriter_text()
 	_schedule_next_character()
 
@@ -205,6 +235,10 @@ func _schedule_next_character() -> void:
 	var speed: float = float(GameState.settings.get("text_speed", 0.04))
 	# Clamp so zero does not hang and very large values are still usable.
 	speed = clampf(speed, 0.001, 0.5)
+	# Slightly longer pause after punctuation for readability.
+	var next_char := _typewriter_target[_typewriter_visible]
+	if next_char in [".", ",", "!", "?", ";", ":"]:
+		speed *= 2.5
 	_typewriter_timer = get_tree().create_timer(speed)
 	_typewriter_timer.timeout.connect(_on_typewriter_tick)
 
@@ -222,6 +256,9 @@ func _on_typewriter_tick() -> void:
 
 func _update_typewriter_text() -> void:
 	_text_box.text = _typewriter_target.substr(0, _typewriter_visible)
+	# Fit text to the label width so it wraps instead of overflowing on small screens.
+	_text_box.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_text_box.fit_content = true
 
 func _stop_typewriter() -> void:
 	_typewriter_active = false
