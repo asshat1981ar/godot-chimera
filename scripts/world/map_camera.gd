@@ -80,7 +80,10 @@ func _process(delta: float) -> void:
 	var input := Input.get_vector("map_pan_left", "map_pan_right", "map_pan_up", "map_pan_down")
 	if input.length() > 0:
 		_target_position += input * pan_speed * delta / zoom.x
-	global_position = global_position.lerp(_target_position, clampf(delta * drag_smooth, 0.0, 1.0))
+	if UIAdapt.is_reduced_motion():
+		global_position = _target_position
+	else:
+		global_position = global_position.lerp(_target_position, clampf(delta * drag_smooth, 0.0, 1.0))
 
 func _zoom_at(world_point: Vector2, factor: float) -> void:
 	var old_zoom := zoom.x
@@ -92,9 +95,11 @@ func _zoom_at(world_point: Vector2, factor: float) -> void:
 	zoom = Vector2(new_zoom, new_zoom)
 	_target_position = new_position
 
-func focus_on(world_pos: Vector2, target_zoom: float = 1.0) -> void:
+func focus_on(world_pos: Vector2, target_zoom: float = 0.0) -> void:
+	## Center on a world position. target_zoom <= 0 keeps the player's current zoom.
 	_target_position = world_pos
-	zoom = Vector2(target_zoom, target_zoom)
+	if target_zoom > 0.0:
+		zoom = Vector2(clampf(target_zoom, min_zoom, max_zoom), clampf(target_zoom, min_zoom, max_zoom))
 
 func _select_at_screen(screen_pos: Vector2) -> void:
 	var world_pos := get_canvas_transform().affine_inverse() * screen_pos

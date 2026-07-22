@@ -22,7 +22,6 @@ const BUTTON_MIN_SIZE := 84.0
 
 var _node_token_scene := preload("res://scenes/world/map_node_token.tscn")
 var _npc_token_scene := preload("res://scenes/world/npc_token.tscn")
-var _ui_adapt: UIAdapt = UIAdapt.new()
 var _journal_pending := 0
 var _camp_pending := 0
 
@@ -39,7 +38,6 @@ func _ready() -> void:
 	EventBus.camp_night_started.connect(_on_camp_night_started)
 	_act_label.text = "Act %d" % GameState.current_act
 	_refresh_objective_label()
-	add_child(_ui_adapt)
 	_apply_safe_area()
 	get_tree().root.size_changed.connect(_apply_safe_area)
 	_refresh_journal_badge()
@@ -146,7 +144,7 @@ func _find_home_node_for_npc(npc_id: String) -> String:
 	return "" if nodes.is_empty() else nodes[0].id
 
 func _on_node_visited(node_id: String) -> void:
-	_camera.focus_on(_node_position(node_id), 1.0)
+	_camera.focus_on(_node_position(node_id))
 	var node := Content.node_by_id(node_id)
 	_node_info.text = "[center]%s[/center]\n%s" % [node.get("name", node_id), node.get("description", "")]
 	_maybe_show_onboarding()
@@ -156,7 +154,10 @@ func _on_ui_request(screen_name: String, payload: Dictionary) -> void:
 		"show_tooltip":
 			_node_info.text = payload.get("text", "")
 		"node_locked":
-			_node_info.text = "The path to %s is sealed." % payload.get("node_id", "")
+			var node_id: String = payload.get("node_id", "")
+			var node_name: String = Content.node_by_id(node_id).get("name", node_id)
+			_node_info.text = "The path to %s is sealed." % node_name
+			SceneSwitcher.toast("The path to %s is sealed." % node_name)
 
 func _on_camp_button_pressed() -> void:
 	Simulation.rest_at_camp()
@@ -174,10 +175,7 @@ func _on_menu_button_pressed() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_back"):
 		get_viewport().set_input_as_handled()
-		if _pause_menu.visible:
-			_toggle_pause_menu()
-		else:
-			_toggle_pause_menu()
+		_toggle_pause_menu()
 
 func _toggle_pause_menu() -> void:
 	_pause_menu.visible = not _pause_menu.visible
@@ -187,10 +185,11 @@ func _on_continue_button_pressed() -> void:
 
 func _on_pause_settings_pressed() -> void:
 	GameState.save_game()
-	SceneSwitcher.switch_to("res://scenes/screens/settings_screen.tscn")
+	SceneSwitcher.switch_to("res://scenes/screens/settings_screen.tscn", {"return_to": "res://scenes/screens/overhead_map.tscn"})
 
 func _on_pause_main_menu_pressed() -> void:
 	GameState.save_game()
+	SceneSwitcher.toast("Progress saved")
 	SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")
 
 func _on_pause_quit_pressed() -> void:
@@ -214,7 +213,7 @@ func _on_quick_journal_pressed() -> void:
 
 func _on_quick_settings_pressed() -> void:
 	GameState.save_game()
-	SceneSwitcher.switch_to("res://scenes/screens/settings_screen.tscn")
+	SceneSwitcher.switch_to("res://scenes/screens/settings_screen.tscn", {"return_to": "res://scenes/screens/overhead_map.tscn"})
 
 func _setup_quick_bar_focus() -> void:
 	var bar := $HUD/QuickBar/Margin/VBox
@@ -282,10 +281,10 @@ func _apply_safe_area() -> void:
 	var top := (safe.position.y / sy) * viewport_size.y
 	var right := ((sx - safe.end.x) / sx) * viewport_size.x
 	var bottom := ((sy - safe.end.y) / sy) * viewport_size.y
-	_ui_adapt.apply_margins($HUD/TopBar, left, top, right, 0.0)
-	_ui_adapt.apply_margins($HUD/Panel, left, 0.0, right, bottom)
-	_ui_adapt.apply_margins($HUD/QuickBar, left, top, right, bottom)
-	_ui_adapt.apply_margins($HUD/PauseMenu, left, top, right, bottom)
+	UIAdapt.apply_margins($HUD/TopBar, left, top, right, 0.0)
+	UIAdapt.apply_margins($HUD/Panel, left, 0.0, right, bottom)
+	UIAdapt.apply_margins($HUD/QuickBar, left, top, right, bottom)
+	UIAdapt.apply_margins($HUD/PauseMenu, left, top, right, bottom)
 
 func _maybe_show_onboarding() -> void:
 	if GameState.settings.get("has_seen_onboarding", false):
