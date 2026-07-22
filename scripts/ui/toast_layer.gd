@@ -1,5 +1,5 @@
 extends CanvasLayer
-## Floating toast layer. Created by SceneSwitcher so it persists across scenes.
+## Floating toast layer. Registered as the ToastLayer autoload so it persists across scenes.
 
 @onready var _panel: PanelContainer
 @onready var _label: Label

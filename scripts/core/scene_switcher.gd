@@ -7,18 +7,15 @@ const FADE_DURATION := 0.35
 var _loading := false
 var pending_payload: Dictionary = {}
 var _overlay: ColorRect
-var _toast: ToastLayer
 
 func _ready() -> void:
-	# Full-screen fade overlay and toast layer survive scene changes because they live on root.
+	# Full-screen fade overlay survives scene changes because it lives on root.
 	# Defer add_child so we don't collide with root's own child setup during autoload init.
 	_overlay = ColorRect.new()
 	_overlay.color = Color(0.06, 0.05, 0.04, 0.0)
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tree.root.call_deferred("add_child", _overlay)
-	_toast = preload("res://scripts/ui/toast_layer.gd").new()
-	_tree.root.call_deferred("add_child", _toast)
 	_tree.root.size_changed.connect(_on_root_size_changed)
 
 func switch_to(path: String, payload: Dictionary = {}) -> void:
@@ -49,8 +46,7 @@ func quit_to_menu() -> void:
 	switch_to("res://scenes/screens/main_menu.tscn")
 
 func toast(text: String, duration := 2.0) -> void:
-	if _toast:
-		_toast.show_toast(text, duration)
+	ToastLayer.show_toast(text, duration)
 
 func _fade_in() -> void:
 	if UIAdapt.is_reduced_motion():

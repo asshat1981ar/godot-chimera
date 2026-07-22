@@ -14,10 +14,13 @@ extends Control
 
 const DEV_TAP_THRESHOLD := 5
 const VERSION := "0.3.0"
+const DEFAULT_RETURN_SCENE := "res://scenes/screens/main_menu.tscn"
 
 var _build_taps := 0
+var _return_scene := DEFAULT_RETURN_SCENE
 
 func _ready() -> void:
+	_return_scene = SceneSwitcher.pending_payload.get("return_to", DEFAULT_RETURN_SCENE)
 	_music.button_pressed = GameState.settings.get("music_enabled", true)
 	_sfx.button_pressed = GameState.settings.get("sfx_enabled", true)
 	_motion.button_pressed = GameState.settings.get("reduced_motion", false)
@@ -65,14 +68,12 @@ func _on_speed_changed(value: float) -> void:
 	_update_speed_label()
 
 func _on_back_pressed() -> void:
-	GameState.save_game("auto")
-	SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")
+	_go_back()
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_back"):
-		get_viewport().set_input_as_handled()
-		GameState.save_game("auto")
-		SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")
+func _go_back() -> void:
+	GameState.save_game("auto")
+	SceneSwitcher.toast("Progress saved")
+	SceneSwitcher.switch_to(_return_scene)
 
 func _on_build_label_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -129,5 +130,4 @@ func _input(event: InputEvent) -> void:
 			_dev_panel.hide()
 			_setup_focus()
 		else:
-			GameState.save_game("auto")
-			SceneSwitcher.switch_to("res://scenes/screens/main_menu.tscn")
+			_go_back()

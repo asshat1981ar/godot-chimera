@@ -1,6 +1,6 @@
 extends Node
 ## UI adaptation helper: safe-area insets, dp scaling, reduced-motion query.
-## Instantiated by screens that need it (not an autoload, to keep project.godot clean).
+## Registered as the UIAdapt autoload; screens call it directly, never instantiate it.
 
 const BASE_HEIGHT := 720.0
 

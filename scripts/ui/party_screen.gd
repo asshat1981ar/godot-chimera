@@ -29,11 +29,14 @@ func _refresh() -> void:
 			_available_list.add_child(hbox)
 
 func _toggle_member(id: String) -> void:
+	var npc_name: String = Content.npc_by_id(id).get("name", id)
 	if GameState.party.has(id):
 		GameState.party.erase(id)
 		EventBus.emit_state_changed("party", GameState.party.duplicate())
+		SceneSwitcher.toast("%s leaves your party." % npc_name)
 	else:
 		GameState.add_to_party(id)
+		SceneSwitcher.toast("%s joins your party." % npc_name)
 	_refresh()
 
 func _on_back_pressed() -> void:
