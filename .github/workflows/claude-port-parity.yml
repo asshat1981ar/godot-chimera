@@ -1,0 +1,72 @@
+name: claude-port-parity
+
+# Weekly rule-parity report between this Godot port and the Kotlin original
+# (asshat1981ar/project-chimera, public). Drift is information, not an error:
+# the port may diverge on purpose. Maintains one issue, "Port parity report".
+on:
+  schedule:
+    - cron: "23 11 * * 4"
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  parity:
+    if: vars.CLAUDE_PAUSE != 'true'
+    runs-on: ${{ vars.CLAUDE_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    concurrency:
+      group: claude-port-parity
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout Kotlin original
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: asshat1981ar/project-chimera
+          path: upstream-kotlin
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Port parity
+        id: parity
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: "/port-parity"
+          claude_args: |
+            --permission-mode auto
+            --model ${{ vars.CLAUDE_MODEL || 'claude-sonnet-5-5' }}
+            --max-turns 20
+            --add-dir upstream-kotlin
+            --allowedTools "Read,Glob,Grep,Bash(gh issue list:*),Bash(gh issue create:*),Bash(gh issue comment:*)"
+            --disallowedTools "Edit,MultiEdit,Write,WebFetch,WebSearch"
+            --json-schema '{"type":"object","required":["rules"],"properties":{"rules":{"type":"array","items":{"type":"object","required":["rule","godot","kotlin","status"],"properties":{"rule":{"type":"string"},"godot":{"type":"string"},"kotlin":{"type":"string"},"status":{"enum":["match","drift","godot_only","kotlin_only"]}}}}}}'
+
+      - name: Summarise
+        if: ${{ !cancelled() }}
+        env:
+          OUT: ${{ steps.parity.outputs.structured_output }}
+        run: |
+          if [ -z "$OUT" ]; then
+            echo "No structured output from the parity run." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo "## Port parity"
+            echo
+            echo "| Status | Rules |"
+            echo "|---|---|"
+            for s in match drift godot_only kotlin_only; do
+              echo "| $s | $(jq --arg s "$s" '[.rules[] | select(.status == $s)] | length' <<<"$OUT") |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"

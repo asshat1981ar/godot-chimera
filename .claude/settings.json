@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/tests/validate_gdscript.py)",
+      "Bash(python3 -m json.tool:*)",
+      "Bash(timeout 120 godot --headless --path . --quit)",
+      "Bash(godot --headless --path . --quit)",
+      "Bash(godot --headless --path . res://scenes/tests/simulation_tests.tscn)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Read(./.env*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.jks)",
+      "Read(**/*.keystore)",
+      "Read(./.tools/**)",
+      "Read(**/secrets/**)",
+      "Bash(keytool:*)"
+    ]
+  }
+}

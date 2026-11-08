@@ -257,3 +257,10 @@ The visual style guide for the UI has been formally defined. All UI artwork must
 #### UI Element Conventions
 - **Panels / dialogue boxes:** Drawn as ink-bordered parchment sheets with torn or deckled edges. Border decorations use simple knotwork or thorn motifs at corners.
 - **Buttons:** Appear as ink-stamped labels or wax-sealed roundels. Hover/focus state adds a faint ink bleed/spread outward from the border.
+
+<!-- BEGIN claude-code-action (generated) -->
+## Claude in GitHub Actions
+- CI has no `.tools/` Godot: Claude runs the Python validators always and the headless Godot checks only when the workflow installed Godot (repo variable `GODOT_SHA512` set).
+- Gameplay state changes go through `Simulation` and `_rng`; UI never mutates `GameState` directly.
+- Content edits in `data/` are checked by `claude-content-gate.yml` (ids, links, choiceType set).
+<!-- END claude-code-action -->

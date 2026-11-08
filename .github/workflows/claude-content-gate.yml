@@ -1,0 +1,76 @@
+name: claude-content-gate
+
+# Typed check of the authored narrative-content graph. json.tool in godot.yml proves
+# syntax only; this proves links, ids and choiceType values resolve. Informational:
+# not a required check unless Aaron adds it to a ruleset.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "data/**"
+      - "assets/**/manifest*.json"
+
+permissions: {}
+
+jobs:
+  content:
+    if: |
+      vars.CLAUDE_PAUSE != 'true' &&
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ${{ vars.CLAUDE_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    concurrency:
+      group: claude-content-gate-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Content gate
+        id: content
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: "/content-gate PR_NUMBER: ${{ github.event.pull_request.number }}"
+          claude_args: |
+            --permission-mode auto
+            --model ${{ vars.CLAUDE_MODEL || 'claude-sonnet-5-5' }}
+            --max-turns 20
+            --allowedTools "Read,Glob,Grep,Bash(python3 -m json.tool:*),Bash(git diff:*),Bash(gh pr comment:*)"
+            --disallowedTools "Edit,MultiEdit,Write,WebFetch,WebSearch"
+            --json-schema '{"type":"object","required":["broken_refs","invalid_choice_types","unreachable_nodes","verdict"],"properties":{"broken_refs":{"type":"array","items":{"type":"object","required":["file","pointer","target"],"properties":{"file":{"type":"string"},"pointer":{"type":"string"},"target":{"type":"string"}}}},"invalid_choice_types":{"type":"array","items":{"type":"string"}},"unreachable_nodes":{"type":"array","items":{"type":"string"}},"missing_assets":{"type":"array","items":{"type":"string"}},"verdict":{"enum":["pass","fail"]}}}'
+
+      - name: Summarise and enforce verdict
+        if: ${{ !cancelled() }}
+        env:
+          OUT: ${{ steps.content.outputs.structured_output }}
+        run: |
+          if [ -z "$OUT" ]; then
+            echo "No content-gate verdict (Claude step produced no output). WARN, not PASS: run python3 -m json.tool over data/*.json and review links manually." >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Content gate produced no verdict"
+            exit 0
+          fi
+          {
+            echo "## Content gate"
+            echo
+            echo "| Check | Count |"
+            echo "|---|---|"
+            echo "| Broken references | $(jq '.broken_refs | length' <<<"$OUT") |"
+            echo "| Invalid choiceType values | $(jq '.invalid_choice_types | length' <<<"$OUT") |"
+            echo "| Unreachable nodes | $(jq '.unreachable_nodes | length' <<<"$OUT") |"
+            echo "| Missing assets | $(jq '(.missing_assets // []) | length' <<<"$OUT") |"
+            echo
+            echo "Verdict: $(jq -r '.verdict' <<<"$OUT")"
+            echo
+            jq -r '.broken_refs[] | "- broken ref: `\(.file)` `\(.pointer)` -> `\(.target)`"' <<<"$OUT"
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$(jq -r '.verdict' <<<"$OUT")" = "pass" ]
