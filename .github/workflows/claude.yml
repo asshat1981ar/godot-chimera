@@ -2,8 +2,15 @@ name: claude
 
 # Tag mode: answers @claude on issues, PR comments and reviews.
 # Owner-only on a public repo; the action also re-checks write access.
+# Trust model: tag mode checks out the PR head, so this job refuses cross-repo (fork)
+# PRs, allowlists no build/test/script tools (only read-only git and gh reads plus the
+# action's own edit and commit tools) and scrubs secrets from subprocess env. Test results
+# come from CI, which runs on Claude's pushes without secrets. Residual risk: on a
+# same-repo branch the owner's own content (including @AGENTS.md-style imports and
+# files outside the action's base-restore list) is read by Claude; the owner gate
+# limits that to branches the owner or Claude pushed.
 on:
-  issue_comment: # zizmor: ignore[dangerous-triggers] -- owner-only if-guard, no PR head checkout, action re-checks write access
+  issue_comment: # zizmor: ignore[dangerous-triggers] -- owner-only trigger; cross-repo PRs refused by the fork step; no PR code executed (no build/test tools allowlisted); env scrub on
     types: [created]
   pull_request_review_comment:
     types: [created]
@@ -21,12 +28,14 @@ jobs:
       github.actor != 'dependabot[bot]' &&
       github.actor == github.repository_owner && (
         (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review' && github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.review.body, '@claude')) ||
         (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
       )
     runs-on: ${{ vars.CLAUDE_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 40
+    env:
+      CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
     concurrency:
       group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
       cancel-in-progress: false
@@ -37,23 +46,34 @@ jobs:
       actions: read # mcp__github_ci__* tools
       id-token: write # Claude GitHub App token exchange (OIDC)
     steps:
+      - name: Refuse cross-repository PRs
+        id: fork
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUM: ${{ github.event.issue.number || github.event.pull_request.number }}
+          IS_PR: ${{ github.event.issue.pull_request != null || github.event.pull_request != null }}
+        run: |
+          cross=true
+          if [ "$IS_PR" != "true" ]; then
+            cross=false
+          elif v=$(gh pr view "$NUM" --repo "$REPO" --json isCrossRepository -q .isCrossRepository) && [ "$v" = "false" ]; then
+            cross=false
+          fi
+          echo "cross=$cross" >> "$GITHUB_OUTPUT"
+          if [ "$cross" = "true" ]; then
+            echo "::warning::Cross-repository (or unverifiable) PR: Claude was not run"
+          fi
+
       - name: Checkout
+        if: steps.fork.outputs.cross != 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Install Godot 4.2.2 (checksum-verified)
-        if: vars.GODOT_SHA512 != ''
-        env:
-          GODOT_SHA512: ${{ vars.GODOT_SHA512 }}
-        run: |
-          curl -fsSL -o "$RUNNER_TEMP/godot.zip" "https://downloads.tuxfamily.org/godotengine/4.2.2/Godot_v4.2.2-stable_linux.x86_64.zip"
-          echo "${GODOT_SHA512}  $RUNNER_TEMP/godot.zip" | sha512sum -c -
-          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
-          sudo ln -sf "$RUNNER_TEMP/godot/Godot_v4.2.2-stable_linux.x86_64" /usr/local/bin/godot
-
       - name: Claude
+        if: steps.fork.outputs.cross != 'true'
         uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -66,6 +86,6 @@ jobs:
             --permission-mode auto
             --model ${{ vars.CLAUDE_MODEL || 'claude-opus-5-5' }}
             --max-turns 40
-            --allowedTools "Bash(python3 scripts/tests/validate_gdscript.py),Bash(python3 -m json.tool:*),Bash(timeout 120 godot --headless --path . --quit),Bash(godot --headless --path . --quit),Bash(godot --headless --path . res://scenes/tests/simulation_tests.tscn),Bash(git status),Bash(git diff:*),Bash(git log:*)"
-            --disallowedTools "WebFetch,WebSearch,Bash(godot --headless --export-debug:*),Bash(godot --headless --export-release:*),Bash(bash export_apk.sh:*),Bash(bash run.sh:*),Bash(keytool:*),Bash(curl:*),Bash(python3 scripts/generate_placeholder_sprites.py:*)"
-            --append-system-prompt "CI context. Respect CLAUDE.md separation of concerns: simulation in scripts/core, UI reads state and emits intents, Content is read-only, all randomness via Simulation._rng. Before finishing run python3 scripts/tests/validate_gdscript.py, validate every changed data/*.json with python3 -m json.tool, and if godot is on PATH run the headless import and simulation tests. If godot is not on PATH, say so in your final comment."
+            --allowedTools "Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh issue view:*)"
+            --disallowedTools "WebFetch,WebSearch,Bash(curl:*)"
+            --append-system-prompt "CI context. Respect CLAUDE.md separation of concerns: simulation in scripts/core, UI reads state and emits intents, Content is read-only, all randomness via Simulation._rng. You cannot run Godot, the Python validators or any tests in this job (by design: no build or test tools are allowlisted). Say so in your final comment; CI (godot.yml and the content gate) runs on your pushed branch without secrets and reports the results. Never stage *.import files or anything under .godot/."

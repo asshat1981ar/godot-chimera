@@ -17,5 +17,3 @@ allow:
   - release-assets.githubusercontent.com
   # npm packages installed by the action
   - registry.npmjs.org
-  # Godot 4.2.2 download in claude.yml and claude-review.yml (only when GODOT_SHA512 is set)
-  - downloads.tuxfamily.org

@@ -1,41 +1,126 @@
 name: claude-content-gate
 
-# Typed check of the authored narrative-content graph. json.tool in godot.yml proves
-# syntax only; this proves links, ids and choiceType values resolve. Informational:
-# not a required check unless Aaron adds it to a ruleset.
+# Content-graph gate for data/*.json.
+#  * `graph` is the deterministic verdict: it runs scripts/check_content_graph.py taken from
+#    the BASE commit against the PR's data (checked out under pr-head/), with `python3 -I`,
+#    no secrets and read-only permissions. It is not skipped for forks or drafts and has no
+#    `paths:` filter, so it is safe to require. If the checker does not exist on the base yet
+#    (the PR that introduces it) the job reports that and passes.
+#  * `explain` is advisory: Claude reads the report plus the PR's data (Read/Glob/Grep only,
+#    no Bash) and adds an explanation. Its output never decides pass/fail; empty output is a
+#    WARN. Never make `explain` a required check.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "data/**"
-      - "assets/**/manifest*.json"
 
 permissions: {}
 
 jobs:
-  content:
+  graph:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: content-graph-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+    outputs:
+      verdict: ${{ steps.check.outputs.verdict }}
+      report: ${{ steps.check.outputs.report }}
+    steps:
+      - name: Checkout base (trusted checker)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout PR head (data only, never executed)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr-head
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Check content graph
+        id: check
+        run: |
+          if [ ! -f scripts/check_content_graph.py ]; then
+            echo "verdict=skipped" >> "$GITHUB_OUTPUT"
+            echo "report=checker not on base yet" >> "$GITHUB_OUTPUT"
+            echo "Content graph: checker is not on the base branch yet; skipped (passes)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ ! -d pr-head/data ]; then
+            echo "verdict=skipped" >> "$GITHUB_OUTPUT"
+            echo "report=no data dir" >> "$GITHUB_OUTPUT"
+            echo "Content graph: not relevant (no data/ directory)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          rc=0
+          python3 -I scripts/check_content_graph.py pr-head/data > "$RUNNER_TEMP/graph.txt" 2>&1 || rc=$?
+          report=$(head -c 8000 "$RUNNER_TEMP/graph.txt" | tr -cd '[:print:]\n')
+          delim="EOF_$(openssl rand -hex 16)"
+          {
+            echo "verdict=$([ "$rc" -eq 0 ] && echo pass || echo fail)"
+            echo "report<<$delim"
+            echo "$report"
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "## Content graph (deterministic)"
+            echo '```'
+            echo "$report"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
+
+  explain:
+    needs: graph
     if: |
+      !cancelled() &&
       vars.CLAUDE_PAUSE != 'true' &&
       github.actor != 'dependabot[bot]' &&
       github.event.pull_request.draft == false &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.graph.outputs.verdict != 'skipped'
     runs-on: ${{ vars.CLAUDE_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 15
+    env:
+      CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
     concurrency:
       group: claude-content-gate-${{ github.event.pull_request.number }}
       cancel-in-progress: true
     permissions:
       contents: read
-      pull-requests: write
     steps:
-      - name: Checkout
+      - name: Checkout base
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 2
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 1
           persist-credentials: false
 
-      - name: Content gate
-        id: content
+      - name: Checkout PR head (read-only data for Claude)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr-head
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Write deterministic report
+        env:
+          REPORT: ${{ needs.graph.outputs.report }}
+        run: |
+          mkdir -p gate-report
+          printf '%s\n' "$REPORT" > gate-report/content-graph.txt
+
+      - name: Explain
+        id: explain
+        continue-on-error: true
         uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -44,33 +129,27 @@ jobs:
           claude_args: |
             --permission-mode auto
             --model ${{ vars.CLAUDE_MODEL || 'claude-sonnet-5-5' }}
-            --max-turns 20
-            --allowedTools "Read,Glob,Grep,Bash(python3 -m json.tool:*),Bash(git diff:*),Bash(gh pr comment:*)"
-            --disallowedTools "Edit,MultiEdit,Write,WebFetch,WebSearch"
-            --json-schema '{"type":"object","required":["broken_refs","invalid_choice_types","unreachable_nodes","verdict"],"properties":{"broken_refs":{"type":"array","items":{"type":"object","required":["file","pointer","target"],"properties":{"file":{"type":"string"},"pointer":{"type":"string"},"target":{"type":"string"}}}},"invalid_choice_types":{"type":"array","items":{"type":"string"}},"unreachable_nodes":{"type":"array","items":{"type":"string"}},"missing_assets":{"type":"array","items":{"type":"string"}},"verdict":{"enum":["pass","fail"]}}}'
+            --max-turns 15
+            --allowedTools "Read,Glob,Grep"
+            --disallowedTools "Bash,Edit,MultiEdit,Write,WebFetch,WebSearch"
+            --json-schema '{"type":"object","required":["summary"],"properties":{"summary":{"type":"string"},"suggested_fixes":{"type":"array","items":{"type":"string"}},"extra_findings":{"type":"array","items":{"type":"string"}}}}'
 
-      - name: Summarise and enforce verdict
+      - name: Summarise (advisory)
         if: ${{ !cancelled() }}
         env:
-          OUT: ${{ steps.content.outputs.structured_output }}
+          OUT: ${{ steps.explain.outputs.structured_output }}
+          VERDICT: ${{ needs.graph.outputs.verdict }}
         run: |
           if [ -z "$OUT" ]; then
-            echo "No content-gate verdict (Claude step produced no output). WARN, not PASS: run python3 -m json.tool over data/*.json and review links manually." >> "$GITHUB_STEP_SUMMARY"
-            echo "::warning::Content gate produced no verdict"
+            echo "::warning::No Claude verdict (deterministic verdict was: $VERDICT)"
+            echo "WARN: no Claude explanation (limit hit or step failed). The deterministic content-graph verdict above is the verdict: $VERDICT." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           {
-            echo "## Content gate"
+            echo "## Content gate: Claude explanation (advisory)"
             echo
-            echo "| Check | Count |"
-            echo "|---|---|"
-            echo "| Broken references | $(jq '.broken_refs | length' <<<"$OUT") |"
-            echo "| Invalid choiceType values | $(jq '.invalid_choice_types | length' <<<"$OUT") |"
-            echo "| Unreachable nodes | $(jq '.unreachable_nodes | length' <<<"$OUT") |"
-            echo "| Missing assets | $(jq '(.missing_assets // []) | length' <<<"$OUT") |"
+            jq -r '.summary' <<<"$OUT"
             echo
-            echo "Verdict: $(jq -r '.verdict' <<<"$OUT")"
-            echo
-            jq -r '.broken_refs[] | "- broken ref: `\(.file)` `\(.pointer)` -> `\(.target)`"' <<<"$OUT"
+            jq -r '(.suggested_fixes // [])[] | "- fix: " + .' <<<"$OUT"
+            jq -r '(.extra_findings // [])[] | "- extra: " + .' <<<"$OUT"
           } >> "$GITHUB_STEP_SUMMARY"
-          [ "$(jq -r '.verdict' <<<"$OUT")" = "pass" ]

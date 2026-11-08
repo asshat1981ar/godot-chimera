@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(python3 scripts/tests/validate_gdscript.py)
+allowed-tools: Bash(gh pr comment:*),Bash(gh pr diff:*)
 description: Review a pull request
 ---
 
@@ -21,6 +21,6 @@ Also run, based on the changed files (`gh pr diff --name-only`):
 
 Instruct each to only provide noteworthy feedback. Once they finish, review the feedback and post only the feedback that you also deem noteworthy.
 
-Run `python3 scripts/tests/validate_gdscript.py` once and quote its summary line. Godot itself is only on PATH when the workflow installed it; if it is not, say that headless import and simulation tests were not run.
+You cannot run validators, Godot or tests in this job (godot.yml runs them without secrets); say so instead of claiming results. Do not read PR comments, reviews or the description; use `gh pr diff` and the checked-out files.
 
 Use inline comments for specific issues and one top-level comment for the summary. Keep feedback concise.
