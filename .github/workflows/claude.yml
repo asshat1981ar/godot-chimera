@@ -3,9 +3,14 @@ name: claude
 # Tag mode: answers @claude on issues, PR comments and reviews.
 # Owner-only on a public repo; the action also re-checks write access.
 # Trust model: tag mode checks out the PR head, so this job refuses cross-repo (fork)
-# PRs, allowlists no build/test/script tools (only read-only git and gh reads plus the
-# action's own edit and commit tools) and scrubs secrets from subprocess env. Test results
-# come from CI, which runs on Claude's pushes without secrets. Residual risk: on a
+# PRs, allowlists no build/test/script tools (only read-only git and gh pr diff plus the
+# action's own edit and commit tools; godot, python, bash and sh are denied outright) and scrubs
+# secrets from subprocess env. gh pr view / gh issue view are denied: they return unfiltered
+# comments, bypassing the include/exclude_comments_by_actor filters, which only cover the
+# action's own pre-fetched context. Test results come from godot.yml, which runs once a PR is
+# open for the branch (not on the bare push). PR runs of godot.yml get no keystore secrets
+# (those are passed only on pushes to main/master); they still execute PR code with the
+# default read-only GITHUB_TOKEN. Residual risk: on a
 # same-repo branch the owner's own content (including @AGENTS.md-style imports and
 # files outside the action's base-restore list) is read by Claude; the owner gate
 # limits that to branches the owner or Claude pushed.
@@ -86,6 +91,6 @@ jobs:
             --permission-mode auto
             --model ${{ vars.CLAUDE_MODEL || 'claude-opus-5-5' }}
             --max-turns 40
-            --allowedTools "Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh issue view:*)"
-            --disallowedTools "WebFetch,WebSearch,Bash(curl:*)"
-            --append-system-prompt "CI context. Respect CLAUDE.md separation of concerns: simulation in scripts/core, UI reads state and emits intents, Content is read-only, all randomness via Simulation._rng. You cannot run Godot, the Python validators or any tests in this job (by design: no build or test tools are allowlisted). Say so in your final comment; CI (godot.yml and the content gate) runs on your pushed branch without secrets and reports the results. Never stage *.import files or anything under .godot/."
+            --allowedTools "Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr diff:*)"
+            --disallowedTools "WebFetch,WebSearch,Bash(curl:*),Bash(gh api:*),Bash(gh search:*),Bash(gh pr view:*),Bash(gh issue view:*),Bash(godot:*),Bash(python3:*),Bash(python:*),Bash(bash:*),Bash(sh:*),Bash(make:*),Bash(keytool:*)"
+            --append-system-prompt "CI context. Respect CLAUDE.md separation of concerns: simulation in scripts/core, UI reads state and emits intents, Content is read-only, all randomness via Simulation._rng. You cannot run Godot, the Python validators or any tests in this job (by design: no build or test tools are allowlisted). Say so in your final comment; godot.yml and the content gate run once a pull request is open for your branch and report the results there (PR runs receive no keystore secrets). Never stage *.import files or anything under .godot/."

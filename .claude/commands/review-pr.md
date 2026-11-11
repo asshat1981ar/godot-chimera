@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(gh pr comment:*),Bash(gh pr diff:*)
+allowed-tools: Bash(gh pr diff:*)
 description: Review a pull request
 ---
 
@@ -21,6 +21,6 @@ Also run, based on the changed files (`gh pr diff --name-only`):
 
 Instruct each to only provide noteworthy feedback. Once they finish, review the feedback and post only the feedback that you also deem noteworthy.
 
-You cannot run validators, Godot or tests in this job (godot.yml runs them without secrets); say so instead of claiming results. Do not read PR comments, reviews or the description; use `gh pr diff` and the checked-out files.
+You cannot run validators, Godot or tests in this job (godot.yml runs them on the PR, without keystore secrets); say so instead of claiming results. Do not read PR comments, reviews or the description; use `gh pr diff` and the checked-out files.
 
-Use inline comments for specific issues and one top-level comment for the summary. Keep feedback concise.
+Use inline comments for specific issues. You have no top-level comment tool: put a concise summary in your final message (shown in the job summary). Keep feedback concise.

@@ -1,11 +1,12 @@
 name: claude-content-gate
 
 # Content-graph gate for data/*.json.
-#  * `graph` is the deterministic verdict: it runs scripts/check_content_graph.py taken from
+#  * `graph` (check name: content-graph) is the deterministic verdict: it runs scripts/check_content_graph.py taken from
 #    the BASE commit against the PR's data (checked out under pr-head/), with `python3 -I`,
 #    no secrets and read-only permissions. It is not skipped for forks or drafts and has no
-#    `paths:` filter, so it is safe to require. If the checker does not exist on the base yet
-#    (the PR that introduces it) the job reports that and passes.
+#    `paths:` filter, so it is safe to require (context: content-graph). It fails closed: the
+#    checker missing on base passes only for the PR that introduces it (present in the head);
+#    data/ or any data/*.json present on base but missing in the head fails.
 #  * `explain` is advisory: Claude reads the report plus the PR's data (Read/Glob/Grep only,
 #    no Bash) and adds an explanation. Its output never decides pass/fail; empty output is a
 #    WARN. Never make `explain` a required check.
@@ -17,6 +18,7 @@ permissions: {}
 
 jobs:
   graph:
+    name: content-graph
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
@@ -48,19 +50,41 @@ jobs:
         id: check
         run: |
           if [ ! -f scripts/check_content_graph.py ]; then
-            echo "verdict=skipped" >> "$GITHUB_OUTPUT"
-            echo "report=checker not on base yet" >> "$GITHUB_OUTPUT"
-            echo "Content graph: checker is not on the base branch yet; skipped (passes)." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            if [ -f pr-head/scripts/check_content_graph.py ]; then
+              echo "verdict=skipped" >> "$GITHUB_OUTPUT"
+              echo "report=checker not on base yet" >> "$GITHUB_OUTPUT"
+              echo "Content graph: this PR introduces the checker (not on base yet); skipped (passes)." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "verdict=fail" >> "$GITHUB_OUTPUT"
+            echo "report=checker missing on base and head" >> "$GITHUB_OUTPUT"
+            echo "::error::scripts/check_content_graph.py is missing on the base branch and in this PR; failing closed. Restore it."
+            exit 1
           fi
           if [ ! -d pr-head/data ]; then
+            if [ -d data ]; then
+              echo "verdict=fail" >> "$GITHUB_OUTPUT"
+              echo "report=data dir removed" >> "$GITHUB_OUTPUT"
+              echo "::error::data/ exists on the base branch but is missing in this PR; failing closed."
+              exit 1
+            fi
             echo "verdict=skipped" >> "$GITHUB_OUTPUT"
             echo "report=no data dir" >> "$GITHUB_OUTPUT"
-            echo "Content graph: not relevant (no data/ directory)." >> "$GITHUB_STEP_SUMMARY"
+            echo "Content graph: not relevant (no data/ directory on base or head)." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           rc=0
           python3 -I scripts/check_content_graph.py pr-head/data > "$RUNNER_TEMP/graph.txt" 2>&1 || rc=$?
+          # The checker skips optional files that are absent, so a PR deleting one would pass: fail on any
+          # data/*.json that exists on base but not in the head.
+          if [ -d data ]; then
+            while IFS= read -r f; do
+              if [ ! -f "pr-head/$f" ]; then
+                echo "[removed] $f: present on base, missing in this PR" >> "$RUNNER_TEMP/graph.txt"
+                rc=1
+              fi
+            done < <(find data -type f -name '*.json' | sort)
+          fi
           report=$(head -c 8000 "$RUNNER_TEMP/graph.txt" | tr -cd '[:print:]\n')
           delim="EOF_$(openssl rand -hex 16)"
           {
@@ -103,13 +127,23 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Checkout PR head (read-only data for Claude)
+      - name: Checkout PR head (data/ and assets/ only, read-only for Claude)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           path: pr-head
           fetch-depth: 1
           persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /data/
+            /assets/
+
+      - name: Drop instruction files from the PR tree
+        run: |
+          # Claude Code loads nested CLAUDE.md files when it reads files beside them: remove any
+          # the PR placed under pr-head/ so PR text stays data.
+          find pr-head -path pr-head/.git -prune -o \( -iname 'CLAUDE*.md' -o -iname 'AGENTS.md' -o -name '.claude' -o -name '.mcp.json' \) -print0 | xargs -0 -r rm -rf --
 
       - name: Write deterministic report
         env:

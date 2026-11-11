@@ -260,7 +260,7 @@ The visual style guide for the UI has been formally defined. All UI artwork must
 
 <!-- BEGIN claude-code-action (generated) -->
 ## Claude in GitHub Actions
-- Claude jobs have no Godot, Python-validator or test tools. Run `python3 scripts/tests/validate_gdscript.py` and the headless Godot checks locally or read the `godot.yml` result; CI runs on Claude's pushed branches without Claude secrets.
+- Claude jobs have no Godot, Python-validator or test tools. Run `python3 scripts/tests/validate_gdscript.py` and the headless Godot checks locally or read the `godot.yml` result; `godot.yml` runs on pull requests (not on a bare branch push); its PR runs execute PR code and get no keystore secrets, which are passed only on pushes to `main`/`master`.
 - Gameplay state changes go through `Simulation` and `_rng`; UI never mutates `GameState` directly.
 - Content edits in `data/` are checked by `claude-content-gate.yml`: the deterministic `scripts/check_content_graph.py` (ids, links, choiceType set) decides; Claude only explains. Tests: `python3 -I -m unittest discover -s tests`.
 <!-- END claude-code-action -->

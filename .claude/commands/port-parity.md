@@ -1,5 +1,5 @@
 ---
-allowed-tools: Read,Glob,Grep,Bash(gh issue list:*),Bash(gh issue create:*),Bash(gh issue comment:*)
+allowed-tools: Read,Glob,Grep
 description: Compare Godot simulation rules with the Kotlin original
 ---
 
@@ -15,4 +15,4 @@ Compare these rules between `scripts/core/simulation.gd` / `scripts/core/dialogu
 
 For each rule give `{rule, godot, kotlin, status}` with status `match`, `drift`, `godot_only` or `kotlin_only`, quoting the concrete values. Drift is information, not an error: the port may diverge on purpose.
 
-Keep exactly one issue titled `Port parity report`: find it with `gh issue list --search "Port parity report in:title" --state all`; if open, add a comment with the changes since the last report; if absent, create it. Do not open any other issue. Finish by returning the JSON matching the required schema.
+You have no GitHub tools and cannot read or write issues; the workflow publishes your result to the single `Port parity report` issue. Finish by returning only the JSON matching the required schema. If you could not read one side, return an empty `rules` array (the workflow then warns) rather than guessing.
