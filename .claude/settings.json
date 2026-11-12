@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [],
+    "deny": [
+      "Read(./.env*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.jks)",
+      "Read(**/*.keystore)",
+      "Read(./.tools/**)",
+      "Read(**/secrets/**)",
+      "Read(./.git/**)",
+      "Bash(keytool:*)"
+    ]
+  }
+}

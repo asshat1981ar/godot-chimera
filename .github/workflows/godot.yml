@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions: {}
+
+concurrency:
+  group: godot-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   GODOT_VERSION: "4.2.2"
   ANDROID_SDK_BUILD_TOOLS: /usr/local/lib/android/sdk/build-tools/34.0.0
@@ -15,17 +21,24 @@ jobs:
   validate-and-export:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Godot
         run: |
           mkdir -p ~/.local/share/godot
+          # downloads.tuxfamily.org no longer serves Godot (404); official releases are on GitHub.
+          # The sha256 is of the 4.2.2 zip, cross-checked against the release's SHA512-SUMS.txt.
           curl -fsSL -o /tmp/godot.zip \
-            "https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          echo "69eb9881e1b82ab93924c83106a7c031497f252bc0c08e199e4da6380072d6ef  /tmp/godot.zip" | sha256sum -c -
           unzip -q /tmp/godot.zip -d ~/.local/share/godot
-          sudo ln -s ~/.local/share/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+          sudo ln -s ~/.local/share/godot/"Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
           godot --version
 
       - name: Install Python dependencies
@@ -37,8 +50,8 @@ jobs:
 
       - name: Validate JSON data
         run: |
-          for f in $(find data -name '*.json'); do
-            python3 -m json.tool "$f" > /dev/null
+          find data -name '*.json' -print0 | while IFS= read -r -d '' f; do
+            python3 -m json.tool "$f" > /dev/null || exit 1
             echo "OK $f"
           done
 
@@ -49,12 +62,15 @@ jobs:
         run: godot --headless --path . res://scenes/tests/simulation_tests.tscn
 
       - name: Export Android APK
+        # Keystore secrets reach this job only on pushes to main/master (the only push refs this
+        # workflow has). pull_request runs execute PR-head code (validator, tests, export plugins),
+        # so they get empty values and sign with the generated debug keystore.
         env:
-          GODOT_ANDROID_KEYSTORE: ${{ secrets.GODOT_ANDROID_KEYSTORE }}
-          GODOT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.GODOT_ANDROID_KEYSTORE_ALIAS }}
-          GODOT_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.GODOT_ANDROID_KEYSTORE_PASSWORD }}
+          GODOT_ANDROID_KEYSTORE: ${{ github.event_name == 'push' && secrets.GODOT_ANDROID_KEYSTORE || '' }}
+          GODOT_ANDROID_KEYSTORE_ALIAS: ${{ github.event_name == 'push' && secrets.GODOT_ANDROID_KEYSTORE_ALIAS || '' }}
+          GODOT_ANDROID_KEYSTORE_PASSWORD: ${{ github.event_name == 'push' && secrets.GODOT_ANDROID_KEYSTORE_PASSWORD || '' }}
         run: |
-          # Use repository debug keystore if release secrets are not configured.
+          # Use repository debug keystore if release secrets are not configured (always on PRs).
           KS="${PWD}/.tools/keystore/chimera-debug.keystore"
           if [ ! -f "$KS" ]; then
             mkdir -p "$(dirname "$KS")"
@@ -85,7 +101,7 @@ jobs:
           apksigner verify --verbose /tmp/chimera-debug.apk | head -n 6
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chimera-android-apk
           path: /tmp/chimera-debug.apk

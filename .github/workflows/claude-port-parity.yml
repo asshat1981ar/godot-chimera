@@ -1,0 +1,111 @@
+name: claude-port-parity
+
+# Weekly rule-parity report between this Godot port and the Kotlin original
+# (asshat1981ar/project-chimera, public). Drift is information, not an error:
+# the port may diverge on purpose. Claude is read-only with no gh tools and returns a typed
+# report (structured_output); a separate deterministic job (no Claude, no secrets) upserts the
+# one issue "Port parity report". Claude never reads public issue text.
+on:
+  schedule:
+    - cron: "23 11 * * 4"
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  parity:
+    if: vars.CLAUDE_PAUSE != 'true'
+    runs-on: ${{ vars.CLAUDE_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    env:
+      CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
+    concurrency:
+      group: claude-port-parity
+      cancel-in-progress: true
+    permissions:
+      contents: read
+    outputs:
+      report: ${{ steps.parity.outputs.structured_output }}
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout Kotlin original
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: asshat1981ar/project-chimera
+          path: upstream-kotlin
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Port parity
+        id: parity
+        continue-on-error: true
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: "/port-parity"
+          claude_args: |
+            --permission-mode auto
+            --model ${{ vars.CLAUDE_MODEL || 'claude-sonnet-5-5' }}
+            --max-turns 20
+            --add-dir upstream-kotlin
+            --allowedTools "Read,Glob,Grep"
+            --disallowedTools "Edit,MultiEdit,Write,WebFetch,WebSearch,Bash"
+            --json-schema '{"type":"object","required":["rules"],"properties":{"rules":{"type":"array","items":{"type":"object","required":["rule","godot","kotlin","status"],"properties":{"rule":{"type":"string"},"godot":{"type":"string"},"kotlin":{"type":"string"},"status":{"enum":["match","drift","godot_only","kotlin_only"]}}}}}}'
+
+  report:
+    needs: parity
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: claude-port-parity-report
+      cancel-in-progress: false
+    permissions:
+      issues: write
+    steps:
+      - name: Summarise and upsert the parity issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          OUT: ${{ needs.parity.outputs.report }}
+        run: |
+          set -euo pipefail
+          title="Port parity report"
+          if ! jq -e '.rules' <<<"${OUT:-}" >/dev/null 2>&1; then
+            echo "::warning::No structured output from the parity run (limit hit or step failed); no issue written. No report is not a match."
+            echo "## Port parity: no verdict (WARN)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo "## Port parity"
+            echo
+            echo "| Status | Rules |"
+            echo "|---|---|"
+            for s in match drift godot_only kotlin_only; do
+              echo "| $s | $(jq --arg s "$s" '[.rules[] | select(.status == $s)] | length' <<<"$OUT") |"
+            done
+            echo
+            echo "| Rule | Godot | Kotlin | Status |"
+            echo "|---|---|---|---|"
+            jq -r '.rules[:80][] | select(.status != "match") | "| \(.rule[0:160] | gsub("[|\n]";" ") | gsub("@";"@\u200b")) | \(.godot[0:300] | gsub("[|\n]";" ") | gsub("@";"@\u200b")) | \(.kotlin[0:300] | gsub("[|\n]";" ") | gsub("@";"@\u200b")) | \(.status) |"' <<<"$OUT"
+          } > "$RUNNER_TEMP/body.md"
+          cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$(jq '.rules | length' <<<"$OUT")" = "0" ]; then
+            echo "::warning::The report lists no rules: nothing was compared; no issue written."
+            exit 0
+          fi
+          { echo; echo "Run: $RUN_URL"; } >> "$RUNNER_TEMP/body.md"
+          existing=$(gh issue list --repo "$REPO" --state open --author app/github-actions --search "\"$title\" in:title" --json number,title \
+            | jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh issue create --repo "$REPO" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi
