@@ -32,8 +32,11 @@ jobs:
       - name: Install Godot
         run: |
           mkdir -p ~/.local/share/godot
+          # downloads.tuxfamily.org no longer serves Godot (404); official releases are on GitHub.
+          # The sha256 is of the 4.2.2 zip, cross-checked against the release's SHA512-SUMS.txt.
           curl -fsSL -o /tmp/godot.zip \
-            "https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          echo "69eb9881e1b82ab93924c83106a7c031497f252bc0c08e199e4da6380072d6ef  /tmp/godot.zip" | sha256sum -c -
           unzip -q /tmp/godot.zip -d ~/.local/share/godot
           sudo ln -s ~/.local/share/godot/"Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
           godot --version
